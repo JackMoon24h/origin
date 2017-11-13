@@ -1,5 +1,5 @@
 enchant();
-
+// Copy of Core.js
 enchant.LoadingScene = enchant.Class.create(enchant.Scene, {
   initialize: function() {
       enchant.Scene.call(this);
@@ -649,7 +649,7 @@ window.onload = function(){
     initialize: function(id, stats, animationData){
       BaseUnit.call(this, id, stats, 441, 418);
 
-      
+
     }
   });
 
