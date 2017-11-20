@@ -1,5 +1,5 @@
 enchant();
-// Copy of Core.js
+
 enchant.LoadingScene = enchant.Class.create(enchant.Scene, {
   initialize: function() {
       enchant.Scene.call(this);
@@ -106,8 +106,9 @@ window.onload = function(){
 
   var Image_Effect = [
     "./Assets/Custom/Characters/Common/Character_Shadow.png", // 0
-    "./Assets/Custom/Effect/Effect1.png", // 1
-    "./Assets/Custom/Effect/Effect2.png" // 2
+    "./Assets/Sub_Assets/arrow.png", // 1
+    "./Assets/Custom/Effect/Effect1.png", // 2
+    "./Assets/Custom/Effect/Effect2.png", // 3
   ];
 
   var Image_UI = [
@@ -115,6 +116,7 @@ window.onload = function(){
     "./Assets/Sub_Assets/healthRed.png", // 1
     "./Assets/Sub_Assets/healthGreen.png", // 2
     "./Assets/Sub_Assets/mapui.png", // 3
+    "./Assets/Sub_Assets/1x1black.png", // 4
   ];
 
   var Image_Character_H1_G1 = [
@@ -175,6 +177,50 @@ window.onload = function(){
     "./Assets/Custom/Characters/Human3/NoGun/Human3_NoGun_Walk.png", // 9
   ];
 
+  var Image_ZombieA = [
+    "./Assets/Custom/Enemies/Zombie1_Default.png", // 0
+    "./Assets/Custom/Enemies/Zombie1/Zombie1_Idle1.png", // 1
+    "./Assets/Custom/Enemies/Zombie1/Zombie1_Attack1.png", // 2
+    "./Assets/Custom/Enemies/Zombie1/Zombie1_Attack2.png", // 3
+    "./Assets/Custom/Enemies/Zombie1/Zombie1_Attack3.png", // 4
+    "./Assets/Custom/Enemies/Zombie1/Zombie1_Attack4.png", // 5
+    "./Assets/Custom/Enemies/Zombie1/Zombie1_Hit1.png", // 6
+    "./Assets/Custom/Enemies/Zombie1/Zombie1_Dead1.png", // 7
+  ];
+
+  var Image_ZombieB = [
+    "./Assets/Custom/Enemies/Zombie2_Default.png", // 0
+    "./Assets/Custom/Enemies/Zombie2/Zombie2_Idle1.png", // 1
+    "./Assets/Custom/Enemies/Zombie2/Zombie2_Attack1.png", // 2
+    "./Assets/Custom/Enemies/Zombie2/Zombie2_Attack2.png", // 3
+    "./Assets/Custom/Enemies/Zombie2/Zombie2_Attack3.png", // 4
+    "./Assets/Custom/Enemies/Zombie2/Zombie2_Attack4.png", // 5
+    "./Assets/Custom/Enemies/Zombie2/Zombie2_Hit1.png", // 6
+    "./Assets/Custom/Enemies/Zombie2/Zombie2_Dead1.png", // 7
+  ];
+
+  var Image_ZombieC = [
+    "./Assets/Custom/Enemies/Zombie3_Default.png", // 0
+    "./Assets/Custom/Enemies/Zombie3/Zombie3_Idle1.png", // 1
+    "./Assets/Custom/Enemies/Zombie3/Zombie3_Attack1.png", // 2
+    "./Assets/Custom/Enemies/Zombie3/Zombie3_Attack2.png", // 3
+    "./Assets/Custom/Enemies/Zombie3/Zombie3_Attack3.png", // 4
+    "./Assets/Custom/Enemies/Zombie3/Zombie3_Attack4.png", // 5
+    "./Assets/Custom/Enemies/Zombie3/Zombie3_Hit1.png", // 6
+    "./Assets/Custom/Enemies/Zombie3/Zombie3_Dead1.png", // 7
+  ];
+
+  var Image_Volker = [
+    "./Assets/Custom/Enemies/ZombieBoss_Default.png", // 0
+    "./Assets/Custom/Enemies/ZombieBoss/Boss_Idle1.png", // 1
+    "./Assets/Custom/Enemies/ZombieBoss/Boss_Attack1.png", // 2
+    "./Assets/Custom/Enemies/ZombieBoss/Boss_Attack2.png", // 3
+    "./Assets/Custom/Enemies/ZombieBoss/Boss_Attack3.png", // 4
+    "./Assets/Custom/Enemies/ZombieBoss/Boss_Attack4.png", // 5
+    "./Assets/Custom/Enemies/ZombieBoss/Boss_Hit1.png", // 6
+    "./Assets/Custom/Enemies/ZombieBoss/Boss_Dead1.png", // 7
+  ];
+
   core.preload(Image_Backgrounds);
   core.preload(Image_Sky);
   core.preload(Image_Props);
@@ -185,6 +231,18 @@ window.onload = function(){
   core.preload(Image_Character_H2_G3);
   core.preload(Image_Character_H3_G4);
   core.preload(Image_Character_H3_NoGun);
+  core.preload(Image_ZombieA);
+  core.preload(Image_ZombieB);
+  core.preload(Image_ZombieC);
+  core.preload(Image_Volker);
+
+
+  // Save Data
+  var playerStatus = {
+    squad: {}
+  };
+
+  // Global Objects
 
   var BG_MOVEMENT_SPEED = 6;
 
@@ -194,15 +252,35 @@ window.onload = function(){
     },
 
     randBtw: function(min, max){
-      var dif = max - min;
+      var dif = Math.abs(max - min);
       var temp = Utils.rand(dif);
       return min + temp;
+    },
+
+    produceRandPos: function(){
+
+    },
+
+    beginUIShield: function(){
+      if(!Utils.shieldSprite){
+        var shieldSprite = new Sprite(core.width, core.height);
+        shieldSprite.image = core.assets[Image_UI[4]];
+        shieldSprite.opacity = 0;
+        core.currentScene.addChild(shieldSprite);
+        Utils.shieldSprite = shieldSprite;
+      }
+    },
+
+    endUIShield: function(){
+      if(Utils.shieldSprite){
+        Utils.shieldSprite.parentNode.removeChild(Utils.shieldSprite);
+        Utils.shieldSprite = null;
+      }
     }
   };
 
 
-
-  // Class Definition
+  // Class
   var Stage = Class.create({
     initialize: function(scene, bgData){
 
@@ -352,7 +430,6 @@ window.onload = function(){
         house3_1.y = core.height - house3_1.height - 520;
         groundLayer.addChild(house3_1);
 
-        // ******* This probably should be on the Objects Layer
         var house2_1 = new Sprite(687, 771);
         house2_1.image = core.assets[Image_Props[1]];
         house2_1.x = 5200;
@@ -374,11 +451,11 @@ window.onload = function(){
       this.playLayer = playLayer;
       scene.addChild(playLayer);
 
-    // Special Layer
-      var uiLayer = new Group();
+    // Special Layer is for scenario.
+      var specialLayer = new Group();
 
-      this.uiLayer = uiLayer;
-      scene.addChild(uiLayer);
+      this.specialLayer = specialLayer;
+      scene.addChild(specialLayer);
 
       var self = this;
       this.skyLayer.addEventListener("enterframe", function(e){
@@ -406,55 +483,29 @@ window.onload = function(){
       });
     },
 
-    setController: function(manager){
-      this.controller = controller;
+    setManager: function(manager){
+      this.manager = manager;
     },
 
-    toLocalSpace: function(worldX, worldY){
-      var localX = worldX - this.tiles.x;
-      var localY = worldY - this.tiles.y;
-      return {x: localX, y: localY};
+    setSquad: function(squad){
+      this.squad = squad;
+      squad._setStage(this);
     },
 
-    toWorldSpace:function(localX, localY) {
-        var worldX = localX +this.tiles.x;
-        var worldY = localY +this.tiles.y;
-        return {x:worldX, y:worldY};
+    setWindow: function(statusWindow){
+      this.statusWindow = statusWindow;
+      statusWindow._setStage(this);
+      this.addChild(statusWindow);
     },
 
-    getTileAtPosition: function(localX, localY){
-      return {
-        i: Math.floor(localX / 200),
-        j: Math.floor(localY / 200)
-      };
-    },
-
-    getCoordinateAtTile: function(i, j){
-      return {
-          localX: i * 200,
-          localY: j * 200
-      };
-    },
-
-    addChild: function(object){
-      this.playLayer.addChild(object);
+    addChild: function(squad){
+      this.playLayer.addChild(squad);
     },
 
     addObject: function(obj){
       obj.y = core.height - obj.height - 460;
       this.groundLayer.addChild(obj);
     },
-
-    addWindow: function(scene){
-      this.uiLayer.addChild(scene);
-    },
-
-    setActiveUnit: function(unit){
-      unit.stage = this;
-      this.activeUnit = unit;
-      this.selectCommand();
-    }
-
   });
 
   // Base mold for all units
@@ -476,7 +527,7 @@ window.onload = function(){
       var collisionRange = new Sprite(150, 300);
       collisionRange.touchEnabled = true;
       collisionRange.backgroundColor = "rgb(228, 198, 0)";
-      collisionRange.opacity = 0;
+      collisionRange.opacity = 0.2;
       this.collisionRange = collisionRange;
       this.addChild(collisionRange);
 
@@ -527,7 +578,7 @@ window.onload = function(){
 
       var self = this;
       collisionRange.addEventListener("touchend", function(e){
-        self.ontouchend(e);
+        self.ontouchend();
       });
     },
 
@@ -555,6 +606,10 @@ window.onload = function(){
       return this.stats.dodge;
     },
 
+    getSpeed: function(){
+      return this.stats.speed;
+    },
+
     getHPMax: function() {
         return this.stats.hpMax;
     },
@@ -571,6 +626,15 @@ window.onload = function(){
         return this.stats.mp;
     },
 
+    // Automatically called functions
+    _setSquad: function(squad){
+      this.squad = squad;
+    },
+
+    _setPosition: function(posIndex){
+      this.position = posIndex;
+    },
+
     updateHPBar: function(){
       var ratio = Math.max(this.stats.hp / this.stats.hpMax, 0);
       if(ratio > 0.5){
@@ -581,11 +645,18 @@ window.onload = function(){
       this.healthRedSprite.scaleX = ratio;
     },
 
-    ontouchend: function(e){
-      console.log(this.stats.name + " (" + this.stats.job + ")" + " " + this.stats.lv);
-    }
-  });
+    isActive: function(){
+      return this.myTurn;
+    },
 
+    setActive: function(flag){
+      this.myTurn = flag;
+    },
+
+    ontouchend: function(){
+      console.log(this.stats.name + " (" + this.stats.job + ")" + "position: " + this.position);
+    },
+  });
 
   var Survivor = Class.create(BaseUnit, {
     initialize: function(id, stats, animationData){
@@ -594,11 +665,13 @@ window.onload = function(){
       // State
       this.isMoving = false;
       this.isMovingBack = false;
-      this.isDead = false;
-      this.isInfected = false;
-      this.isVirtuous = false;
+
       this.isBleeding = false;
       this.isPoisoned = false;
+      this.isDead = false;
+
+      this.isInfected = false;
+      this.isVirtuous = false;
 
       this.body.image = animationData.idleImage;
       this.body.frame = animationData.idleFrame;
@@ -621,9 +694,8 @@ window.onload = function(){
       this.addEventListener("enterframe", function(){
         // In battle, moving cannot be performed.
         if(core.isBattle){
-
-          return;
-
+          this.body.image = animationData.idleImage;
+          this.body.frame = animationData.idleFrame;
         } else {
           if(core.input.right){
             this.isMoving = true;
@@ -640,89 +712,183 @@ window.onload = function(){
             this.body.frame = animationData.idleFrame;
           }
         }
-
       }); // End of enterframe function of Survivor
-    }
+    },
+
   });
 
-  var Zombie = Class.create(BaseFune, {
+  var Zombie = Class.create(BaseUnit, {
     initialize: function(id, stats, animationData){
       BaseUnit.call(this, id, stats, 441, 418);
 
+      this.isBleeding = false;
+      this.isPoisoned = false;
+      this.isDead = false;
 
+      this.body.image = animationData.idleImage;
+      this.body.frame = animationData.idleFrame;
+      this.body.scaleX = -1;
+
+      this.collisionRange.x = this.body.x + 170;
+      this.collisionRange.y = this.body.y + 50;
+
+      this.healthBackSprite.x = this.collisionRange.x + (this.collisionRange.width - this.healthBackSprite.width) / 2;
+      this.healthBackSprite.y = this.collisionRange.y + this.collisionRange.height;
+
+      this.healthRedSprite.x = this.collisionRange.x + (this.collisionRange.width - this.healthRedSprite.width) / 2;
+      this.healthRedSprite.y = this.collisionRange.y + this.collisionRange.height;
+
+      this.healthGreenSprite.x = this.collisionRange.x + (this.collisionRange.width - this.healthGreenSprite.width) / 2;
+      this.healthGreenSprite.y = this.collisionRange.y + this.collisionRange.height;
+
+      this.shadow.x = this.collisionRange.x + (this.collisionRange.width - this.shadow.width) / 2;
+      this.shadow.y = this.healthBackSprite.y - 60;
+
+      this.addEventListener("enterframe", function(){
+
+      }); // End of enterframe function of Zombie
     }
   });
 
+  var ZombieBoss = Class.create(BaseUnit, {
+    initialize: function(id, stats, animationData){
+      BaseUnit.call(this, id, stats, 682, 620);
 
-  // Squad is the game player
+      this.isDead = false;
+      this.isBleeding = false;
+      this.isPoisoned = false;
+
+      this.body.image = animationData.idleImage;
+      this.body.frame = animationData.idleFrame;
+      this.body.scaleX = -1;
+
+      this.collisionRange.x = this.body.x + 145;
+      this.collisionRange.y = this.body.y + 50;
+
+      this.healthBackSprite.x = this.collisionRange.x + (this.collisionRange.width - this.healthBackSprite.width) / 2;
+      this.healthBackSprite.y = this.collisionRange.y + this.collisionRange.height;
+
+      this.healthRedSprite.x = this.collisionRange.x + (this.collisionRange.width - this.healthRedSprite.width) / 2;
+      this.healthRedSprite.y = this.collisionRange.y + this.collisionRange.height;
+
+      this.healthGreenSprite.x = this.collisionRange.x + (this.collisionRange.width - this.healthGreenSprite.width) / 2;
+      this.healthGreenSprite.y = this.collisionRange.y + this.collisionRange.height;
+
+      this.shadow.x = this.collisionRange.x + (this.collisionRange.width - this.shadow.width) / 2;
+      this.shadow.y = this.healthBackSprite.y - 60;
+
+      this.addEventListener("enterframe", function(){
+      }); // End of enterframe function of Boss
+    }
+  });
+
   var Squad = Class.create(Group, {
-    initialize: function(survivor1, survivor2, survivor3, survivor4){
+    initialize: function(unit1, unit2, unit3, unit4){
       Group.call(this);
-
       this.x = 30;
       this.y = 200;
 
-      this.survivorList = [];
-      this.survivorCountInitial = 0;
+      this.unitCountInitial = arguments.length;
 
-      var pos1 = new Group();
-      pos1.addChild(survivor1);
-      pos1.initialUnit = survivor1;
-      pos1.unit = survivor1;
-      this.pos1 = pos1;
-      pos1.x = this.x + 165 * 3;
-      pos1.y = this.y;
-      this.addChild(pos1);
+      // Access each unit by this.position[posIndex]
+      this.position = {
+        1: {},
+        2: {},
+        3: {},
+        4: {}
+      };
 
-      var pos2 = new Group();
-      pos2.addChild(survivor2);
-      pos2.initialUnit = survivor2;
-      pos2.unit = survivor2;
-      this.pos2 = pos2;
-      pos2.x = this.x + 165 * 2;
-      pos2.y = this.y;
-      this.addChild(pos2);
+      this.addChild(unit1);
+      this.addChild(unit2);
+      this.addChild(unit3);
+      this.addChild(unit4);
 
-      var pos3 = new Group();
-      pos3.addChild(survivor3);
-      pos3.initialUnit = survivor3;
-      pos3.unit = survivor3;
-      this.pos3 = pos3;
-      pos3.x = this.x + 165 * 1;
-      pos3.y = this.y;
-      this.addChild(pos3);
-
-      var pos4 = new Group();
-      pos4.addChild(survivor4);
-      pos4.initialUnit = survivor4;
-      pos4.unit = survivor4;
-      this.pos4 = pos4;
-      pos4.x = this.x + 165 * 0;
-      pos4.y = this.y;
-      this.addChild(pos4);
-
+      this.initialPositionUnit(unit1, 1);
+      this.initialPositionUnit(unit2, 2);
+      this.initialPositionUnit(unit3, 3);
+      this.initialPositionUnit(unit4, 4);
 
     },
 
-    isActive: function(){
-      return this.myTurn;
+    _setStage: function(stage){
+      this.stage = stage;
     },
 
-    setActive: function(flag){
-      this.myTurn = flag;
+    _setManager: function(manager){
+      this.manager = manager;
     },
 
-    setController: function(controller){
-      this.controller = controller;
+    initialPositionUnit: function(unit, posIndex){
+      unit.x = this.x + 165 * (4 - posIndex);
+      unit.y = this.y;
+
+      this.position[posIndex] = unit;
+
+      unit._setSquad(this);
+      unit._setPosition(posIndex);
     },
 
-    addSurvivor: function(survivor){
-      survivor.squad = this;
-      this.survivorList.push(survivor);
-      this.survivorCountInitial ++;
+    positionUnit: function(unit,  posIndex){
+      var movedUnit = this.getUnitByPos(posIndex);
+      var movingUnit = unit;
+
+      var movedUnitPosX = this.x + 165 * (4 - posIndex);
+      var movedUnitPosY = this.y;
+
+      var index = movingUnit.position;
+      var movingUnitPosX = this.x + 165 * (4 - index);
+      var movingUnitPosY = this.y;
+
+      movingUnit.tl.moveTo(movedUnitPosX, movedUnitPosY, 60, enchant.Easing.BOUNCE_EASEOUT);
+      movedUnit.tl.moveTo(movingUnitPosX, movingUnitPosY, 60, enchant.Easing.BOUNCE_EASEOUT);
+
+      this.position[posIndex] = movingUnit;
+      this.position[index] = movedUnit;
+      movingUnit._setPosition(posIndex);
+      movedUnit._setPosition(index);
+
+      console.log(this.position[1].stats.name);
+      console.log(this.position[2].stats.name);
+      console.log(this.position[3].stats.name);
+      console.log(this.position[4].stats.name);
     },
 
-    removeSurvivor: function(survivor){
+    getSquadSPD: function(){
+      var sum = 0;
+      for(var i = 0; i < 4; i++){
+        sum += this.getUnitByPos[i].getSpeed();
+      }
+      return sum;
+    },
+
+    getUnitByPos: function(posIndex){
+      return this.position[posIndex];
+    },
+
+    getUnitByTurn: function(turnNumber){
+      return this.manager.unitList[turnNumber];
+    },
+
+    getUnitCount: function(){
+      var unitCount = this.getUnitCountInitial();
+      for(var i = 1; i < 5; i++){
+        if(this.position[i].isDead == true){
+          unitCount--;
+        }
+      }
+      return unitCount;
+    },
+
+    getUnitCountInitial: function(){
+      return this.unitCountInitial;
+    },
+
+    getActiveUnit: function(){
+      this.activeUnit = this.manager.getActiveUnit();
+      return this.activeUnit;
+    },
+
+    removeUnit: function(unit){
       delete survivor.squad;
 
       var newList = [];
@@ -731,54 +897,86 @@ window.onload = function(){
           newList.push(this.getSurvivor(i));
         }
       }
-      this.survivorList = newList;
+      this.unitList = newList;
 
       if(this.activeSurvivor == survivor){
         this.activeSurvivor = null;
       }
     },
 
-    getSurvivor: function(index){
-      return this.survivorList[index];
+  });
+
+  var EnemySquad = Class.create(Squad, {
+    initialize: function(unit1, unit2, unit3, unit4){
+      Squad.call(this, unit1, unit2, unit3, unit4);
+
+      this.x = 500;
+      this.y = 200;
+
+      this.initialPositionUnit(unit1, 1);
+      this.initialPositionUnit(unit2, 2);
+      this.initialPositionUnit(unit3, 3);
+      this.initialPositionUnit(unit4, 4);
     },
 
-    getSurvivorCount: function(){
-      return this.survivorList.length;
+    initialPositionUnit: function(unit, posIndex){
+      unit.x = this.x + 165 * (posIndex - 1);
+      unit.y = this.y;
+
+      this.position[posIndex] = unit;
+      unit._setSquad(this);
+      unit._setPosition(posIndex);
     },
 
-    getSurvivorCountInitial: function(){
-      return this.survivorCountInitial;
-    },
+    positionUnit: function(unit,  posIndex){
+      var movedUnit = this.getUnitByPos(posIndex);
+      var movingUnit = unit;
 
-    getActiveSurvivor: function(){
-      if(this.activeSurvivor){
-        return this.activeSurvivor;
-      } else {
-        return this.survivorList[0];
-      }
-    },
+      var movedUnitPosX = this.x + 165 * (posIndex - 1);
+      var movedUnitPosY = this.y;
 
-    setActiveSurvivor: function(survivor){
-      this.activeSurvivor = survivor;
-      this.controller.updateTurn();
+      var index = movingUnit.position;
+      var movingUnitPosX = this.x + 165 * (index - 1);
+      var movingUnitPosY = this.y;
+
+      movingUnit.tl.moveTo(movedUnitPosX, movedUnitPosY, 60, enchant.Easing.BOUNCE_EASEOUT);
+      movedUnit.tl.moveTo(movingUnitPosX, movingUnitPosY, 60, enchant.Easing.BOUNCE_EASEOUT);
+
+      this.position[posIndex] = movingUnit;
+      this.position[index] = movedUnit;
+      movingUnit._setPosition(posIndex);
+      movedUnit._setPosition(index);
+
+      console.log(this.position[1].position);
+      console.log(this.position[2].position);
+      console.log(this.position[3].position);
+      console.log(this.position[4].position);
     }
   });
 
-  var WindowGroup = Class.create(Group, {
+  var StatusWindow = Class.create(Group, {
     initialize: function(){
       Group.call(this);
 
-      var uiWindow = new Sprite(2000, 200);
-      uiWindow.x = 0;
-      uiWindow.y = 800;
-      this.uiWindow = uiWindow;
-      uiWindow.visible = true;
+      var bgWindow = new Sprite(2000, 200);
+      bgWindow.image = core.assets[Image_Tiles[0]];
+      bgWindow.x = 0;
+      bgWindow.y = 800;
 
-      uiWindow.image = core.assets[Image_Tiles[0]];
+      this.bgWindow = bgWindow;
+      this.addChild(bgWindow);
+    },
 
-      this.addChild(uiWindow);
+    _setStage: function(stage){
+      this.stage = stage;
+    },
+
+    _setManager: function(manager){
+      this.manager = manager;
     }
   });
+
+  // Units Class
 
   var Gang = Class.create(Survivor, {
     initialize: function(id, animationData){
@@ -900,23 +1098,273 @@ window.onload = function(){
     }
   });
 
+  var ZombieA = Class.create(Zombie, {
+    initialize: function(id, animationData){
+      Zombie.call(this, id, {
+        lv: 1,
+        exp: 0,
+        job: "Zombie Type A",
+        name: "Jason",
+        damage: 5,
+        protest: 2,
+        critical: 0.11,
+        accuracy: 0.59,
+        dodge: 0.11,
+        resistPoison: 0.67,
+        resistBleed: 0.57,
+        resistPull: 0.58,
+        resistStun: 0.34,
+        resistDebuff: 0.25,
+        resistDisease : 1,
+        resistDeath: 0,
+        virtue: 0,
+        speed: 3,
+        hpMax: 17,
+        mpMax: 100,
+        scout: 0.1,
+        disposal: 0,
+      }, animationData);
+      this.body.scaleX = -1;
+    }
+  });
+
+  var ZombieB = Class.create(Zombie, {
+    initialize: function(id, animationData){
+      Zombie.call(this, id, {
+        lv: 1,
+        exp: 0,
+        job: "Zombie Type B",
+        name: "Edy",
+        damage: 8,
+        protest: 1,
+        critical: 0.08,
+        accuracy: 0.88,
+        dodge: 0.02,
+        resistPoison: 0.47,
+        resistBleed: 0.51,
+        resistPull: 0.34,
+        resistStun: 0.31,
+        resistDebuff: 0.34,
+        resistDisease : 1,
+        resistDeath: 0,
+        virtue: 0,
+        speed: 2,
+        hpMax: 19,
+        mpMax: 100,
+        scout: 0.1,
+        disposal: 0,
+      }, animationData);
+      this.body.scaleX = -1;
+    }
+  });
+
+  var ZombieC = Class.create(Zombie, {
+    initialize: function(id, animationData){
+      Zombie.call(this, id, {
+        lv: 1,
+        exp: 0,
+        job: "Zombie Type C",
+        name: "William",
+        damage: 2,
+        protest: 3,
+        critical: 0.05,
+        accuracy: 0.95,
+        dodge: 0.22,
+        resistPoison: 0.87,
+        resistBleed: 0.75,
+        resistPull: 0.65,
+        resistStun: 0.76,
+        resistDebuff: 0.54,
+        resistDisease : 1,
+        resistDeath: 0,
+        virtue: 0,
+        speed: 5,
+        hpMax: 21,
+        mpMax: 100,
+        scout: 0.1,
+        disposal: 0,
+      }, animationData);
+      this.body.scaleX = -1;
+    }
+  });
+
+  var Volker = Class.create(ZombieBoss, {
+    initialize: function(id, animationData){
+      Zombie.call(this, id, {
+        lv: 1,
+        exp: 0,
+        job: "Volker",
+        name: "Bob",
+        damage: 10,
+        protest: 9,
+        critical: 0.16,
+        accuracy: 0.82,
+        dodge: 0.02,
+        resistPoison: 0.51,
+        resistBleed: 0.42,
+        resistPull: 0.96,
+        resistStun: 0.93,
+        resistDebuff: 0.15,
+        resistDisease : 1,
+        resistDeath: 0,
+        virtue: 0,
+        speed: 4,
+        hpMax: 45,
+        mpMax: 100,
+        scout: 0.1,
+        disposal: 0,
+      }, animationData);
+      this.body.scaleX = -1;
+    }
+  });
+
+
   var EventTrigger = Class.create(Sprite, {
     initialize: function(posX, obj){
       Sprite.call(this, 100, 250);
 
       this.x = posX;
+      this.eventGenerated = false;
 
       this.backgroundColor = "rgb(236, 58, 19)";
       this.opacity = 0.5;
 
       var self = this;
       this.addEventListener("enterframe", function(){
-        if(self.intersect(obj)){
-          console.log("Shit");
+        if(self.intersect(obj) && self.eventGenerated == false){
+          console.log("Event occurs!");
         }
       });
     }
   });
+
+  var Manager = Class.create({
+    initialize: function(statusWindow, scene){
+      this.squadList = [];
+      this.unitList = [];
+      this.turnCounter = 0;
+
+      this.setStatusWindow(statusWindow, scene);
+    },
+
+    setStatusWindow: function(statusWindow, scene){
+      this.statusWindow = statusWindow;
+      scene.addChild(statusWindow);
+      statusWindow._setManager(this);
+    },
+
+    addSquad: function(squad, enemySquad){
+      squad._setManager(this);
+      enemySquad._setManager(this);
+
+      this.squad = squad;
+      this.enemySquad = enemySquad;
+
+      this.squadList.push(squad);
+      this.squadList.push(enemySquad);
+
+      for(var i = 0; i < squad.getUnitCount(); i++){
+        this.unitList.push(squad.position[i + 1]);
+      }
+
+      for(var j = 0; j < enemySquad.getUnitCount(); j++){
+        this.unitList.push(enemySquad.position[i + 1]);
+      }
+    },
+
+    getActiveUnit: function(){
+      var activeUnit = this.unitList[this.turnCounter % this.unitList.length];
+      this.activeUnit = activeUnit;
+      if(activeUnit){
+        this.indicate(activeUnit);
+        activeUnit.collisionRange.backgroundColor = "rgb(0, 204, 204)";
+        activeUnit.collisionRange.opacity = 0.5;
+      }
+      return this.activeUnit;
+    },
+
+    indicate: function(activeUnit){
+      if(this.indicator){
+        this.indicator.parentNode.removeChild(this.indicator);
+        delete this.indicator;
+      }
+
+      this.indicator = new Effect(Image_Effect[1], 64, 64);
+      core.currentScene.addChild(this.indicator);
+
+      this.indicator.x = this.activeUnit.collisionRange.x + 50;
+      this.indicator.y = this.activeUnit.collisionRange.y - 100;
+      console.log(this.activeUnit.collisionRange.x, this.activeUnit.collisionRange.y);
+    },
+
+    getUnitInfo: function(number){
+      return this.unitList[number - 1];
+    },
+
+    beginBattle: function(squad, EnemySquad){
+      this.addSquad(squad, EnemySquad);
+      this.startTurn();
+    },
+
+    startTurn: function(){
+      Utils.endUIShield();
+      var activeUnit = this.getActiveUnit();
+      activeUnit.setActive(true);
+      console.log(activeUnit.stats.name);
+    },
+  });
+
+  var Effect = Class.create(Sprite, {
+    initialize: function(imageSource, w, h){
+      Sprite.call(this, w, h);
+      this.image = core.assets[imageSource];
+      this.touchEnabled = false;
+    }
+  });
+
+  // Battle Scene
+  core.battle = function(battleID){
+    core.isBattle = true;
+
+    var scene = new Scene(core.width, core.height);
+    var statusWindow = new StatusWindow();
+    var manager = new Manager(statusWindow, scene);
+
+    var ZombieAAnimationData = {
+      idleImage: core.assets[Image_ZombieA[1]],
+      idleFrame: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40],
+    };
+
+    var ZombieBAnimationData = {
+      idleImage: core.assets[Image_ZombieB[1]],
+      idleFrame: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40],
+    };
+
+    var ZombieCAnimationData = {
+      idleImage: core.assets[Image_ZombieC[1]],
+      idleFrame: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40],
+    };
+
+    var VolkerAnimationData = {
+      idleImage: core.assets[Image_Volker[1]],
+      idleFrame: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40],
+    };
+
+    var undeadA = new ZombieA(5, ZombieAAnimationData);
+    var undeadB = new ZombieB(6, ZombieBAnimationData);
+    var undeadC = new ZombieC(7, ZombieCAnimationData);
+    var undeadC2 = new ZombieC(8, ZombieCAnimationData);
+
+    var horde = new EnemySquad(undeadA, undeadB, undeadC, undeadC2);
+    scene.addChild(horde);
+
+    var squad = playerStatus.squad;
+    scene.addChild(squad);
+
+    manager.beginBattle(squad, horde);
+
+    return scene;
+  };
 
   // Main program
   core.onload = function(){
@@ -982,10 +1430,10 @@ window.onload = function(){
       moveBackFrame: [20,19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1]
     };
 
-    var uiArea = new WindowGroup();
-
     var stage = new Stage(core.rootScene, bgData);
-    stage.addWindow(uiArea);
+
+    var statusWindow = new StatusWindow();
+    stage.setWindow(statusWindow);
 
     var gang = new Gang(1, GangAnimationData);
     var police = new Police(2, PoliceAnimationData);
@@ -993,10 +1441,20 @@ window.onload = function(){
     var nurse = new Nurse(4, NurseAnimationData);
 
     var squad = new Squad(gang, cheerLeader, nurse, police);
-    stage.addChild(squad);
 
-    var trigger1 = new EventTrigger(1500, squad.pos1.unit.collisionRange);
+    stage.addChild(squad);
+    stage.setSquad(squad);
+
+    playerStatus.squad = squad;
+
+    var trigger1 = new EventTrigger(1500, squad.position[1].collisionRange);
     stage.addObject(trigger1);
+
+    core.rootScene.addEventListener("enterframe", function(){
+      if(trigger1.intersect(squad.position[1].collisionRange) && trigger1.eventGenerated == false){
+        core.pushScene(core.battle());
+      }
+    });
 
   }; // End of core.onload
 
