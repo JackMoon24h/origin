@@ -109,6 +109,9 @@ window.onload = function(){
     "./Assets/Sub_Assets/arrow.png", // 1
     "./Assets/Custom/Effect/Effect1.png", // 2
     "./Assets/Custom/Effect/Effect2.png", // 3
+    "./Assets/Custom/Effect/effect_sheet_1.png", // 4
+    "./Assets/Custom/Effect/effect_sheet_2.png", // 5
+    "./Assets/Custom/Effect/icon_danger.png", // 6
   ];
 
   var Image_UI = [
@@ -117,10 +120,25 @@ window.onload = function(){
     "./Assets/Sub_Assets/healthGreen.png", // 2
     "./Assets/Sub_Assets/mapui.png", // 3
     "./Assets/Sub_Assets/1x1black.png", // 4
+    "./Assets/Sub_Assets/settings.png", // 5
+    "./Assets/Sub_Assets/window.png", // 6
+    "./Assets/Sub_Assets/btnCancel.png", // 7
+    "./Assets/Sub_Assets/btnContinue.png", // 8
+    "./Assets/Sub_Assets/alertScreen.png", // 9
+    "./Assets/Sprites_UI/squad_logo.png", // 10
+    "./Assets/Sprites_UI/enemy_logo.png", // 11
+    "./Assets/Sub_Assets/win.png", // 12
+    "./Assets/Sub_Assets/lose.png", // 13
+    "./Assets/Sprites_UI/popup_background.png", // 14
+    "./Assets/Sprites_UI/dialogue_1.png", // 15
+    "./Assets/Sprites_UI/dialogue_2.png", // 16
+    "./Assets/Sprites_UI/dialogue_3.png", // 17
+    "./Assets/Sub_Assets/cancelBtn.png", // 18
+    "./Assets/Sub_Assets/cancelBtn_small.png", // 19
   ];
 
   var Image_Character_H1_G1 = [
-    "./Assets/Custom/Characters/Human1/Human1_Default.png", // 0
+    "./Assets/Custom/Characters/Human1/Human1_Default_thumb.png", // 0
     "./Assets/Custom/Characters/Human1/Gun1/Human1_Gun1_Idle.png", // 1
     "./Assets/Custom/Characters/Human1/Gun1/Human1_Gun1_Dead1.png", // 2
     "./Assets/Custom/Characters/Human1/Gun1/Human1_Gun1_Dead2.png", // 3
@@ -135,7 +153,7 @@ window.onload = function(){
   ];
 
   var Image_Character_H2_G3 = [
-    "./Assets/Custom/Characters/Human2/Human2_Default.png", // 0
+    "./Assets/Custom/Characters/Human2/Human2_Default_thumb.png", // 0
     "./Assets/Custom/Characters/Human2/Gun3/Human2_Gun3_Idle.png", // 1
     "./Assets/Custom/Characters/Human2/Gun3/Human2_Gun3_Dead1.png", // 2
     "./Assets/Custom/Characters/Human2/Gun3/Human2_Gun3_Dead2.png", // 3
@@ -150,7 +168,7 @@ window.onload = function(){
   ];
 
   var Image_Character_H3_G4 = [
-    "./Assets/Custom/Characters/Human3/Human3_Default.png", // 0
+    "./Assets/Custom/Characters/Human3/Human3_Default_thumb.png", // 0
     "./Assets/Custom/Characters/Human3/Gun4/Human3_Gun4_Idle.png", // 1
     "./Assets/Custom/Characters/Human3/Gun4/Human3_Gun4_Dead1.png", // 2
     "./Assets/Custom/Characters/Human3/Gun4/Human3_Gun4_Dead2.png", // 3
@@ -165,7 +183,7 @@ window.onload = function(){
   ];
 
   var Image_Character_H3_NoGun = [
-    "./Assets/Custom/Characters/Human3/Human3_Default.png", // 0
+    "./Assets/Custom/Characters/Human3/Human3_Default_thumb.png", // 0
     "./Assets/Custom/Characters/Human3/NoGun/Human3_NoGun_Idle.png", // 1
     "./Assets/Custom/Characters/Human3/NoGun/Human3_NoGun_Dead1.png", // 2
     "./Assets/Custom/Characters/Human3/NoGun/Human3_NoGun_Dead2.png", // 3
@@ -178,7 +196,7 @@ window.onload = function(){
   ];
 
   var Image_ZombieA = [
-    "./Assets/Custom/Enemies/Zombie1_Default.png", // 0
+    "./Assets/Custom/Enemies/Zombie1_Default_thumb.png", // 0
     "./Assets/Custom/Enemies/Zombie1/Zombie1_Idle1.png", // 1
     "./Assets/Custom/Enemies/Zombie1/Zombie1_Attack1.png", // 2
     "./Assets/Custom/Enemies/Zombie1/Zombie1_Attack2.png", // 3
@@ -189,7 +207,7 @@ window.onload = function(){
   ];
 
   var Image_ZombieB = [
-    "./Assets/Custom/Enemies/Zombie2_Default.png", // 0
+    "./Assets/Custom/Enemies/Zombie2_Default_thumb.png", // 0
     "./Assets/Custom/Enemies/Zombie2/Zombie2_Idle1.png", // 1
     "./Assets/Custom/Enemies/Zombie2/Zombie2_Attack1.png", // 2
     "./Assets/Custom/Enemies/Zombie2/Zombie2_Attack2.png", // 3
@@ -200,7 +218,7 @@ window.onload = function(){
   ];
 
   var Image_ZombieC = [
-    "./Assets/Custom/Enemies/Zombie3_Default.png", // 0
+    "./Assets/Custom/Enemies/Zombie3_Default_thumb.png", // 0
     "./Assets/Custom/Enemies/Zombie3/Zombie3_Idle1.png", // 1
     "./Assets/Custom/Enemies/Zombie3/Zombie3_Attack1.png", // 2
     "./Assets/Custom/Enemies/Zombie3/Zombie3_Attack2.png", // 3
@@ -211,7 +229,7 @@ window.onload = function(){
   ];
 
   var Image_Volker = [
-    "./Assets/Custom/Enemies/ZombieBoss_Default.png", // 0
+    "./Assets/Custom/Enemies/ZombieBoss_Default_thumb.png", // 0
     "./Assets/Custom/Enemies/ZombieBoss/Boss_Idle1.png", // 1
     "./Assets/Custom/Enemies/ZombieBoss/Boss_Attack1.png", // 2
     "./Assets/Custom/Enemies/ZombieBoss/Boss_Attack2.png", // 3
@@ -219,6 +237,15 @@ window.onload = function(){
     "./Assets/Custom/Enemies/ZombieBoss/Boss_Attack4.png", // 5
     "./Assets/Custom/Enemies/ZombieBoss/Boss_Hit1.png", // 6
     "./Assets/Custom/Enemies/ZombieBoss/Boss_Dead1.png", // 7
+  ];
+
+  var Audio = [
+    "./Assets/Sound/music/field.mp3", // 0 (field bgm)
+    "./Assets/Sound/music/battle.mp3", // 1 (battle bgm)
+    "./Assets/Sound/sound/se2.wav", // 2
+    "./Assets/Sound/sound/shot2.wav", // 3
+    "./Assets/Sound/sound/bomb4.wav", // 4
+    "./Assets/Sound/sound/se4.wav", // 5
   ];
 
   core.preload(Image_Backgrounds);
@@ -235,6 +262,7 @@ window.onload = function(){
   core.preload(Image_ZombieB);
   core.preload(Image_ZombieC);
   core.preload(Image_Volker);
+  core.preload(Audio);
 
 
   // Save Data
@@ -245,6 +273,7 @@ window.onload = function(){
   // Global Objects
 
   var BG_MOVEMENT_SPEED = 6;
+  var fontStyle = "32px 'century', arial, sans-serif";
 
   var Utils = {
     rand: function(num){
@@ -485,6 +514,7 @@ window.onload = function(){
 
     setManager: function(manager){
       this.manager = manager;
+      manager.stage = this;
     },
 
     setSquad: function(squad){
@@ -495,7 +525,6 @@ window.onload = function(){
     setWindow: function(statusWindow){
       this.statusWindow = statusWindow;
       statusWindow._setStage(this);
-      this.addChild(statusWindow);
     },
 
     addChild: function(squad){
@@ -531,6 +560,13 @@ window.onload = function(){
       this.collisionRange = collisionRange;
       this.addChild(collisionRange);
 
+      var indicator = new Effect(Image_Effect[5], 128, 128, [
+        23,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,23,23,23,23,23,23,23,23,23,23,23,23
+      ]);
+      this.indicator = indicator;
+      indicator.visible = false;
+      this.addChild(indicator);
+
       var healthBackSprite = new Sprite(128, 12);
       this.healthBackSprite = healthBackSprite;
       healthBackSprite.image = core.assets[Image_UI[0]];
@@ -555,7 +591,7 @@ window.onload = function(){
         job: stats.job,
         name: stats.name,
         damage: stats.damage,
-        protest: stats.protest,
+        protection: stats.protection,
         critical: stats.critical,
         accuracy: stats.accuracy,
         dodge: stats.dodge,
@@ -578,7 +614,16 @@ window.onload = function(){
 
       var self = this;
       collisionRange.addEventListener("touchend", function(e){
-        self.ontouchend();
+        console.log(self.stats.name + " (" + self.stats.job + ")" + "position: " + self.position);
+        var popup = new Profile(self);
+      });
+
+      indicator.addEventListener("enterframe", function(){
+        if(self.myTurn){
+          indicator.visible = true;
+        } else {
+          indicator.visible = false;
+        }
       });
     },
 
@@ -586,12 +631,24 @@ window.onload = function(){
       return this.stats.id;
     },
 
+    getName: function(){
+      return this.stats.name;
+    },
+
+    getJob: function(){
+      return this.stats.job;
+    },
+
+    getCurrentPosition: function(){
+      return this.position;
+    },
+
     getDamage: function(){
       return this.stats.damage;
     },
 
-    getProtest: function(){
-      return this.stats.protest;
+    getProtection: function(){
+      return this.stats.protection;
     },
 
     getCritical: function(){
@@ -626,6 +683,10 @@ window.onload = function(){
         return this.stats.mp;
     },
 
+    getImage: function(){
+      return this.thumbImage;
+    },
+
     // Automatically called functions
     _setSquad: function(squad){
       this.squad = squad;
@@ -645,6 +706,16 @@ window.onload = function(){
       this.healthRedSprite.scaleX = ratio;
     },
 
+    // updateMPBar: function(){
+    //   var ratio = Math.max(this.stats.hp / this.stats.hpMax, 0);
+    //   if(ratio > 0.5){
+    //     this.healthGreenSprite.scaleX = ratio;
+    //   } else {
+    //     this.healthGreenSprite.scaleX = 0;
+    //   }
+    //   this.healthRedSprite.scaleX = ratio;
+    // },
+
     isActive: function(){
       return this.myTurn;
     },
@@ -653,9 +724,264 @@ window.onload = function(){
       this.myTurn = flag;
     },
 
-    ontouchend: function(){
-      console.log(this.stats.name + " (" + this.stats.job + ")" + "position: " + this.position);
+    takeDamage: function(damage){
+      var actualDamage = Math.max(damage / (1 + this.stats.protection / 20), 1);
+      this.stats.hp -= actualDamage;
+      this.updateHPBar();
+      return this.stats.hp;
     },
+
+    healDamage: function(recover){
+      this.stats.hp = Math.min(this.stats.hp + recover, this.stats.hpMax);
+      this.updateHPBar();
+    },
+
+    attack: function(target){
+      Utils.beginUIShield();
+      var damage;
+      var baseDamage = this.stats.attack;
+      // variance : -0.5 ~ 0.5
+      var variance = Math.random() - 0.5;
+      var variableDamage = (baseDamage / 2) * variance;
+
+      var attackRoll = Math.random();
+      var isCritical = false;
+      var isMiss = false;
+
+      if(attackRoll > 0.9){
+        damage = (baseDamage + variableDamage) * 2;
+        isCritical = true;
+      } else if (attackRoll < 0.1){
+        damage = 0;
+      } else {
+        damage = baseDamage + variableDamage;
+      }
+
+      damage = Math.ceil(damage);
+
+      if(damage > 0){
+        var beforeHP = target.getHP();
+        var afterHp = target.takeDamage(damage);
+
+        this.manager.sndManager.playFX(Audio[3]);
+
+        if(isCritical){
+          var alertWindow = new AlertWindow("Critical!", this.manager);
+          var self = this;
+          alertWindow.onTouch = function(){
+            if(afterHp <= 0){
+              var alertWindow = new AlertWindow("Death...", self.manager);
+              alertWindow.onTouch = function(){
+                target.deathBlow();
+                self.manager.endTurn();
+              };
+            } else {
+              self.manager.endTurn();
+            }
+          };
+        }
+      }
+    },
+
+    deathBlow: function(){
+      this.squad.manager.sndManager.playFX(Audio[4]);
+      this.squad.removeUnit(this);
+      this.counter = 1;
+      this.isDead = true;
+      this.onenterframe = function(){
+        this.counter++;
+        if(this.counter == 12){
+          this.parentNode.removeChild(this);
+        }
+      };
+    },
+  });
+
+  var ShieldWindow = Class.create(Scene, {
+    initialize: function(manager){
+      Scene.call(this);
+      core.pushScene(this);
+
+      manager.sndManager.playFX(Audio[2]);
+
+      var shieldSprite = new Sprite(core.width, core.height);
+      shieldSprite.image = core.assets[Image_UI[4]];
+      shieldSprite.opacity = 0.5;
+      this.addChild(shieldSprite);
+
+      var self = this;
+      shieldSprite.addEventListener(enchant.Event.TOUCH_END, function(params) {
+          if (self.onTouch) {
+              manager.sndManager.playFX(sndClick);
+              core.popScene();
+              self.onTouch();
+          }
+      });
+    }
+  });
+
+  var AlertWindow = Class.create(Scene, {
+    initialize: function(message, manager){
+      Scene.call(this);
+      core.pushScene(this);
+
+      var shieldSprite = new Sprite(core.width, core.height);
+      shieldSprite.image = core.assets[Image_UI[4]];
+      shieldSprite.opacity = 0.2;
+      this.addChild(shieldSprite);
+
+      var windowSprite = new Sprite(320, 160);
+      windowSprite.image = core.assets[Image_UI[9]];
+      windowSprite.x = (core.width - 320)/2;
+      windowSprite.y = (core.height - 160)/2;
+      this.addChild(windowSprite);
+
+      var fontColor = "rgba(255, 255, 105, 1.0)";
+
+      messageLabel = new Label(message);
+      this.addChild(messageLabel);
+      messageLabel.x = windowSprite.x + 40;
+      messageLabel.y = windowSprite.y + 64;
+      messageLabel.font = fontStyle;
+      messageLabel.color = fontColor;
+
+      var once = false;
+      var self = this;
+
+      windowSprite.scaleX = 0.7;
+      windowSprite.scaleY = 0.7;
+
+      windowSprite.tl.scaleTo(1, 10, enchant.Easing.ELASTIC_EASEOUT).then(function(){
+        self.addEventListener("touchend", function(params){
+          if(once == false){
+            once = true;
+            windowSprite.tl.fadeTo(0, 5).then(function(){
+              manager.sndManager.playFX(Audio[2]);
+              core.popScene();
+              if(self.onTouch){
+                self.onTouch();
+              }
+            });
+          }
+        });
+      });
+    }
+  });
+
+  var Profile = Class.create(Group, {
+    initialize: function(unit){
+      Group.call(this);
+      core.currentScene.addChild(this);
+
+      unit.squad.manager.sndManager.playFX(Audio[2]);
+
+      var windowGroup = new Group();
+      this.addChild(windowGroup);
+
+      var windowSprite = new Sprite(512, 512);
+      windowSprite.image = core.assets[Image_UI[6]];
+      windowSprite.x = (core.width - windowSprite.width) / 2;
+      windowSprite.y = 250;
+      windowGroup.addChild(windowSprite);
+
+      var statsGroup = new Group();
+      statsGroup.x = windowSprite.x + 64;
+      statsGroup.y = windowSprite.y + 32;
+      windowGroup.addChild(statsGroup);
+
+      var fontColor = "rgba(255, 255, 105, 1.0)";
+      var fontStyle = "17px 'century', arial, sans-serif";
+
+      unitLabel = new Label("Name："+unit.getName());
+      statsGroup.addChild(unitLabel);
+      unitLabel.x = 0;
+      unitLabel.y = 0;
+      unitLabel.font = fontStyle;
+      unitLabel.color = fontColor;
+
+      jobLabel = new Label("Job："+unit.getJob());
+      statsGroup.addChild(jobLabel);
+      jobLabel.x = 0;
+      jobLabel.y = 38 * 1;
+      jobLabel.font = fontStyle;
+      jobLabel.color = fontColor;
+
+      attackLabel = new Label("DAMAGE："+unit.getDamage());
+      statsGroup.addChild(attackLabel);
+      attackLabel.x = 0;
+      attackLabel.y = 38 * 2;
+      attackLabel.font = fontStyle;
+      attackLabel.color = fontColor;
+
+      defenseLabel = new Label("PROTECTION："+unit.getProtection());
+      statsGroup.addChild(defenseLabel);
+      defenseLabel.x = 0;
+      defenseLabel.y = 38 * 3;
+      defenseLabel.font = fontStyle;
+      defenseLabel.color = fontColor;
+
+      accuracyLabel = new Label("ACCURACY："+unit.getAccuracy());
+      statsGroup.addChild(accuracyLabel);
+      accuracyLabel.x = 0;
+      accuracyLabel.y = 38 * 4;
+      accuracyLabel.font = fontStyle;
+      accuracyLabel.color = fontColor;
+
+      dodgeLabel = new Label("DODGE："+unit.getDodge());
+      statsGroup.addChild(dodgeLabel);
+      dodgeLabel.x = 0;
+      dodgeLabel.y = 38 * 5;
+      dodgeLabel.font = fontStyle;
+      dodgeLabel.color = fontColor;
+
+      hpLabel = new Label("HP："+unit.getHP()+"/"+unit.getHPMax());
+      statsGroup.addChild(hpLabel);
+      hpLabel.x = 0;
+      hpLabel.y = 38 * 6;
+      hpLabel.font = fontStyle;
+      hpLabel.color = fontColor;
+
+      mpLabel = new Label("MP："+unit.getMP()+"/"+unit.getMPMax());
+      statsGroup.addChild(mpLabel);
+      mpLabel.x = 0;
+      mpLabel.y = 38 * 7;
+      mpLabel.font = fontStyle;
+      mpLabel.color = fontColor;
+
+      var profileSprite = new Sprite(unit.thumbWidthSize, unit.thumbHeightSize);
+      profileSprite.scale(0.75, 0.75);
+      profileSprite.x = (core.width + windowSprite.width) / 2 - unit.thumbWidthSize - 10;
+      profileSprite.y = windowSprite.y - 5;
+      profileSprite.image = unit.getImage();
+      windowGroup.addChild(profileSprite);
+
+      var self = this;
+      var cancelBtnSprite = new Sprite(128, 128);
+      cancelBtnSprite.image = core.assets[Image_UI[18]];
+      cancelBtnSprite.x = windowSprite.x + 200;
+      cancelBtnSprite.y = windowSprite.y + 420;
+      windowGroup.addChild(cancelBtnSprite);
+
+      windowGroup.originX = 256;
+      windowGroup.originY = 256;
+      windowGroup.scaleX = 0.7;
+      windowGroup.scaleY = 0.7;
+      windowGroup.tl.scaleTo(1, 10, enchant.Easing.ELASTIC_EASEOUT).then(function(){
+        cancelBtnSprite.addEventListener("touchstart", function(e){
+          cancelBtnSprite.tl.scaleTo(1.1, 10, enchant.Easing.ELASTIC_EASEOUT);
+        });
+
+        cancelBtnSprite.addEventListener("touchend", function(e){
+          cancelBtnSprite.tl.scaleTo(0.9, 3).and().fadeTo(0, 5);
+          profileSprite.tl.fadeTo(0, 5);
+          windowSprite.tl.fadeTo(0, 5).then(function(){
+            core.currentScene.removeChild(self);
+            unit.squad.manager.sndManager.playFX(Audio[2]);
+          });
+        });
+
+      });
+    }
   });
 
   var Survivor = Class.create(BaseUnit, {
@@ -678,6 +1004,9 @@ window.onload = function(){
 
       this.collisionRange.x = this.body.x + 145;
       this.collisionRange.y = this.body.y + 50;
+
+      this.indicator.x = this.collisionRange.x;
+      this.indicator.y = this.collisionRange.y - 50;
 
       this.healthBackSprite.x = this.collisionRange.x + (this.collisionRange.width - this.healthBackSprite.width) / 2;
       this.healthBackSprite.y = this.collisionRange.y + this.collisionRange.height;
@@ -783,12 +1112,14 @@ window.onload = function(){
   });
 
   var Squad = Class.create(Group, {
-    initialize: function(unit1, unit2, unit3, unit4){
+    initialize: function(id, unit1, unit2, unit3, unit4){
       Group.call(this);
       this.x = 30;
       this.y = 200;
+      this.id = id;
 
-      this.unitCountInitial = arguments.length;
+      this.unitCountInitial = 0;
+      this.unitList = [];
 
       // Access each unit by this.position[posIndex]
       this.position = {
@@ -807,7 +1138,6 @@ window.onload = function(){
       this.initialPositionUnit(unit2, 2);
       this.initialPositionUnit(unit3, 3);
       this.initialPositionUnit(unit4, 4);
-
     },
 
     _setStage: function(stage){
@@ -818,6 +1148,15 @@ window.onload = function(){
       this.manager = manager;
     },
 
+    isActive: function(){
+      return this.myTurn;
+    },
+
+    setActive: function(flag){
+      this.myTurn = flag;
+    },
+
+    // Replacing the roll of addUnit()
     initialPositionUnit: function(unit, posIndex){
       unit.x = this.x + 165 * (4 - posIndex);
       unit.y = this.y;
@@ -826,6 +1165,9 @@ window.onload = function(){
 
       unit._setSquad(this);
       unit._setPosition(posIndex);
+
+      this.unitList.push(unit);
+      this.unitCountInitial++;
     },
 
     positionUnit: function(unit,  posIndex){
@@ -855,28 +1197,30 @@ window.onload = function(){
 
     getSquadSPD: function(){
       var sum = 0;
-      for(var i = 0; i < 4; i++){
+      for(var i = 0; i < this.getUnitCount(); i++){
         sum += this.getUnitByPos[i].getSpeed();
       }
       return sum;
+    },
+
+    getUnit: function(index){
+      return this.unitList[index];
+    },
+
+    getUnitCount: function(){
+      return this.unitList.length;
     },
 
     getUnitByPos: function(posIndex){
       return this.position[posIndex];
     },
 
-    getUnitByTurn: function(turnNumber){
-      return this.manager.unitList[turnNumber];
+    getPosByUnit: function(unit){
+      return unit.position;
     },
 
-    getUnitCount: function(){
-      var unitCount = this.getUnitCountInitial();
-      for(var i = 1; i < 5; i++){
-        if(this.position[i].isDead == true){
-          unitCount--;
-        }
-      }
-      return unitCount;
+    getUnitByTurn: function(turnNumber){
+      return this.manager.unitList[turnNumber];
     },
 
     getUnitCountInitial: function(){
@@ -884,34 +1228,42 @@ window.onload = function(){
     },
 
     getActiveUnit: function(){
-      this.activeUnit = this.manager.getActiveUnit();
-      return this.activeUnit;
+      if(this.activeUnit){
+        return this.activeUnit;
+      } else {
+        return this.unitList[0];
+      }
+    },
+
+    setActiveUnit: function(){
+      this.activeUnit = unit;
+      this.manager.updateTurn();
     },
 
     removeUnit: function(unit){
-      delete survivor.squad;
+      delete unit.squad;
 
       var newList = [];
-      for(var i = 0; i < this.getSurvivorCount(); i++){
-        if(this.getSurvivor(i) != survivor){
-          newList.push(this.getSurvivor(i));
+      for(var i = 0; i < this.getUnitCount(); i++){
+        if(this.getUnit(i) != unit){
+          newList.push(this.getUnit(i));
         }
       }
       this.unitList = newList;
 
-      if(this.activeSurvivor == survivor){
-        this.activeSurvivor = null;
+      if(this.activeUnit == unit){
+        this.activeUnit = null;
       }
     },
-
   });
 
   var EnemySquad = Class.create(Squad, {
-    initialize: function(unit1, unit2, unit3, unit4){
-      Squad.call(this, unit1, unit2, unit3, unit4);
+    initialize: function(id, unit1, unit2, unit3, unit4){
+      Squad.call(this, id, unit1, unit2, unit3, unit4);
 
       this.x = 500;
       this.y = 200;
+      this.id = id;
 
       this.initialPositionUnit(unit1, 1);
       this.initialPositionUnit(unit2, 2);
@@ -926,6 +1278,9 @@ window.onload = function(){
       this.position[posIndex] = unit;
       unit._setSquad(this);
       unit._setPosition(posIndex);
+
+      this.unitList.push(unit);
+      this.unitCountInitial++;
     },
 
     positionUnit: function(unit,  posIndex){
@@ -951,28 +1306,9 @@ window.onload = function(){
       console.log(this.position[2].position);
       console.log(this.position[3].position);
       console.log(this.position[4].position);
-    }
-  });
-
-  var StatusWindow = Class.create(Group, {
-    initialize: function(){
-      Group.call(this);
-
-      var bgWindow = new Sprite(2000, 200);
-      bgWindow.image = core.assets[Image_Tiles[0]];
-      bgWindow.x = 0;
-      bgWindow.y = 800;
-
-      this.bgWindow = bgWindow;
-      this.addChild(bgWindow);
     },
 
-    _setStage: function(stage){
-      this.stage = stage;
-    },
-
-    _setManager: function(manager){
-      this.manager = manager;
+    simulatePlay: function(){
     }
   });
 
@@ -986,7 +1322,7 @@ window.onload = function(){
         job: "Gang",
         name: "John",
         damage: 8,
-        protest: 4,
+        protection: 4,
         critical: 0.12,
         accuracy: 0.86,
         dodge: 0.21,
@@ -1004,8 +1340,10 @@ window.onload = function(){
         scout: 0.23,
         disposal: 0.46,
       }, animationData);
-
-    }
+      this.thumbImage = core.assets[Image_Character_H1_G1[0]];
+      this.thumbWidthSize = 246;
+      this.thumbHeightSize = 480;
+    },
   });
 
   var Police = Class.create(Survivor, {
@@ -1016,7 +1354,7 @@ window.onload = function(){
         job: "Police",
         name: "Brad",
         damage: 14,
-        protest: 8,
+        protection: 8,
         critical: 0.16,
         accuracy: 0.92,
         dodge: 0.12,
@@ -1034,8 +1372,10 @@ window.onload = function(){
         scout: 0.12,
         disposal: 0.37,
       }, animationData);
-
-    }
+      this.thumbImage = core.assets[Image_Character_H2_G3[0]];
+      this.thumbWidthSize = 211;
+      this.thumbHeightSize = 480;
+    },
   });
 
   var CheerLeader = Class.create(Survivor, {
@@ -1046,7 +1386,7 @@ window.onload = function(){
         job: "CheerLeader",
         name: "Hanna",
         damage: 5,
-        protest: 10,
+        protection: 10,
         critical: 0.04,
         accuracy: 0.78,
         dodge: 0.27,
@@ -1064,8 +1404,10 @@ window.onload = function(){
         scout: 0.14,
         disposal: 0.17,
       }, animationData);
-
-    }
+      this.thumbImage = core.assets[Image_Character_H3_G4[0]];
+      this.thumbWidthSize = 243;
+      this.thumbHeightSize = 480;
+    },
   });
 
   var Nurse = Class.create(Survivor, {
@@ -1076,7 +1418,7 @@ window.onload = function(){
         job: "Nurse",
         name: "Jessy",
         damage: 6,
-        protest: 2,
+        protection: 2,
         critical: 0.03,
         accuracy: 0.81,
         dodge: 0.12,
@@ -1094,8 +1436,10 @@ window.onload = function(){
         scout: 0.11,
         disposal: 0.05,
       }, animationData);
-
-    }
+      this.thumbImage = core.assets[Image_Character_H3_NoGun[0]];
+      this.thumbWidthSize = 243;
+      this.thumbHeightSize = 480;
+    },
   });
 
   var ZombieA = Class.create(Zombie, {
@@ -1106,7 +1450,7 @@ window.onload = function(){
         job: "Zombie Type A",
         name: "Jason",
         damage: 5,
-        protest: 2,
+        protection: 2,
         critical: 0.11,
         accuracy: 0.59,
         dodge: 0.11,
@@ -1125,7 +1469,10 @@ window.onload = function(){
         disposal: 0,
       }, animationData);
       this.body.scaleX = -1;
-    }
+      this.thumbImage = core.assets[Image_ZombieA[0]];
+      this.thumbWidthSize = 284;
+      this.thumbHeightSize = 480;
+    },
   });
 
   var ZombieB = Class.create(Zombie, {
@@ -1136,7 +1483,7 @@ window.onload = function(){
         job: "Zombie Type B",
         name: "Edy",
         damage: 8,
-        protest: 1,
+        protection: 1,
         critical: 0.08,
         accuracy: 0.88,
         dodge: 0.02,
@@ -1155,6 +1502,9 @@ window.onload = function(){
         disposal: 0,
       }, animationData);
       this.body.scaleX = -1;
+      this.thumbImage = core.assets[Image_ZombieB[0]];
+      this.thumbWidthSize = 214;
+      this.thumbHeightSize = 480;
     }
   });
 
@@ -1166,7 +1516,7 @@ window.onload = function(){
         job: "Zombie Type C",
         name: "William",
         damage: 2,
-        protest: 3,
+        protection: 3,
         critical: 0.05,
         accuracy: 0.95,
         dodge: 0.22,
@@ -1185,6 +1535,9 @@ window.onload = function(){
         disposal: 0,
       }, animationData);
       this.body.scaleX = -1;
+      this.thumbImage = core.assets[Image_ZombieC[0]];
+      this.thumbWidthSize = 203;
+      this.thumbHeightSize = 480;
     }
   });
 
@@ -1196,7 +1549,7 @@ window.onload = function(){
         job: "Volker",
         name: "Bob",
         damage: 10,
-        protest: 9,
+        protection: 9,
         critical: 0.16,
         accuracy: 0.82,
         dodge: 0.02,
@@ -1215,6 +1568,9 @@ window.onload = function(){
         disposal: 0,
       }, animationData);
       this.body.scaleX = -1;
+      this.thumbImage = core.assets[Image_Volker[0]];
+      this.thumbWidthSize = 414;
+      this.thumbHeightSize = 480;
     }
   });
 
@@ -1245,90 +1601,438 @@ window.onload = function(){
       this.turnCounter = 0;
 
       this.setStatusWindow(statusWindow, scene);
+
+      this.sndManager = new SoundManager();
+    },
+
+    addSquad: function(squad){
+      squad._setManager(this);
+      this.squad = squad;
+      this.squadList.push(squad);
     },
 
     setStatusWindow: function(statusWindow, scene){
       this.statusWindow = statusWindow;
-      scene.addChild(statusWindow);
       statusWindow._setManager(this);
+      scene.addChild(statusWindow);
     },
 
-    addSquad: function(squad, enemySquad){
-      squad._setManager(this);
-      enemySquad._setManager(this);
+    getSquad: function(number){
+      return this.squadList[number - 1];
+    },
 
-      this.squad = squad;
-      this.enemySquad = enemySquad;
+    getActiveSquad: function(){
+      return this.squadList[this.turnCounter % this.squadList.length];
+    },
 
-      this.squadList.push(squad);
-      this.squadList.push(enemySquad);
+    getNonActiveSquad: function(){
+      return this.squadList[(this.turnCounter + 1) % this.squadList.length];
+    },
 
-      for(var i = 0; i < squad.getUnitCount(); i++){
-        this.unitList.push(squad.position[i + 1]);
+    getUnitList: function(){
+      var unitList = [];
+
+      var squad1 = this.getSquad(1);
+      for(var i = 0; i < squad1.getUnitCount(); i++){
+        unitList.push(squad1.getUnit(i));
       }
 
-      for(var j = 0; j < enemySquad.getUnitCount(); j++){
-        this.unitList.push(enemySquad.position[i + 1]);
+      var squad2 = this.getSquad(2);
+      for(var j = 0; j < squad2.getUnitCount(); j++){
+        unitList.push(squad2.getUnit(j));
       }
     },
 
     getActiveUnit: function(){
-      var activeUnit = this.unitList[this.turnCounter % this.unitList.length];
-      this.activeUnit = activeUnit;
-      if(activeUnit){
-        this.indicate(activeUnit);
-        activeUnit.collisionRange.backgroundColor = "rgb(0, 204, 204)";
-        activeUnit.collisionRange.opacity = 0.5;
-      }
-      return this.activeUnit;
-    },
-
-    indicate: function(activeUnit){
-      if(this.indicator){
-        this.indicator.parentNode.removeChild(this.indicator);
-        delete this.indicator;
-      }
-
-      this.indicator = new Effect(Image_Effect[1], 64, 64);
-      core.currentScene.addChild(this.indicator);
-
-      this.indicator.x = this.activeUnit.collisionRange.x + 50;
-      this.indicator.y = this.activeUnit.collisionRange.y - 100;
-      console.log(this.activeUnit.collisionRange.x, this.activeUnit.collisionRange.y);
+      var squad = this.getActiveSquad();
+      return squad.getActiveUnit();
     },
 
     getUnitInfo: function(number){
       return this.unitList[number - 1];
     },
 
-    beginBattle: function(squad, EnemySquad){
-      this.addSquad(squad, EnemySquad);
+    beginBattle: function(squad, enemySquad){
+      this.addSquad(squad);
+      this.addSquad(enemySquad);
       this.startTurn();
     },
 
     startTurn: function(){
       Utils.endUIShield();
-      var activeUnit = this.getActiveUnit();
-      activeUnit.setActive(true);
-      console.log(activeUnit.stats.name);
+      var squad = this.getActiveSquad();
+      squad.setActive(true);
+      this.updateTurn();
+
+      if(squad instanceof EnemySquad){
+        Utils.beginUIShield();
+        squad.simulatePlay();
+      }
+      console.log("Turn Started");
     },
+
+    updateTurn: function(){
+      this.statusWindow.updateTurn(this.turnCounter);
+      this.statusWindow.updateUnit(this.getActiveUnit().stats.name);
+      this.statusWindow.updateWindowInfo(this.getActiveUnit());
+      this.sndManager.playFX(Audio[5]);
+
+      this.commandTurn();
+    },
+
+    commandTurn: function(){
+      var command;
+    },
+
+    endTurn: function(){
+      var squad = this.getActiveSquad();
+      squad.setActive(false);
+
+      var winner = this.getWinner();
+      if(winner){
+        var self = this;
+        setTimeout(function(){
+          self.battleOver(winner);
+        }, 1000);
+      } else {
+        this.turnCounter++;
+      }
+
+      var banner = new Sprite(800, 227);
+      if(squad.id == 1){
+        banner.image = core.assets[Image_UI[10]];
+      } else {
+        banner.image = core.assets[Image_UI[11]];
+      }
+
+      banner.opacity = 0;
+      banner.x = (core.width - banner.width) / 2;
+      banner.y = 300;
+      core.currentScene.addChild(banner);
+
+      var self = this;
+      banner.tl.fadeIn(20).delay(30).fadeOut(10).then(function(){
+        self.startTurn();
+        core.currentScene.removeChild(banner);
+      });
+    },
+
+    getWinner : function(){
+      if(this.enemySquad.getUnitCount() == 0){
+        return this.squad;
+      } else if (this.squad.getUnitCount() == 0){
+        return this.enemySquad;
+      }
+      return null;
+    },
+
+    battleOver: function(winner){
+      var touchable = new ShieldWindow(this);
+      Utils.beginUIShield();
+
+      var banner = new Sprite(800, 227);
+      banner.image = core.assets[Image_UI[9]];
+
+      banner.opacity = 0;
+      banner.x = (core.width - banner.width) / 2;
+      banner.y = 300;
+      core.currentScene.addChild(banner);
+
+      var self = this;
+      banner.tl.fadeIn(20).delay(30).fadeOut(10).then(function(){
+        core.currentScene.removeChild(banner);
+
+        var resultBanner = new Sprite(512, 256);
+        if(winner.id == 1){
+          resultBanner.image = core.assets[Image_UI[12]];
+          touchable.onTouch = function(){
+            // Save current data
+            core.popScene();
+            core.isBattle = false;
+          };
+        } else if (winner.id == 2){
+          resultBanner.image = core.assets[Image_UI[13]];
+          touchable.onTouch = function(){
+            core.isBattle = false;
+            location.reload();
+          };
+        }
+
+        resultBanner.opacity = 0;
+        resultBanner.touchEnabled = false;
+        resultBanner.x = (core.width - resultBanner.width) / 2;
+        resultBanner.y = 200;
+        core.currentScene.addChild(resultBanner);
+
+        resultBanner.tl.fadeIn(20).then(function(){
+          Utils.endUIShield();
+        });
+      });
+    }
+  });
+
+  // StatusWindow can replace the role of FrameUI Class
+  var StatusWindow = Class.create(Group, {
+    initialize: function(){
+      Group.call(this);
+
+      var bgWindow = new Sprite(2000, 220);
+      bgWindow.image = core.assets[Image_Tiles[0]];
+      bgWindow.x = 0;
+      bgWindow.y = 800;
+
+      this.bgWindow = bgWindow;
+      this.addChild(bgWindow);
+
+      var fontColor = "rgba(255, 255, 105, 1.0)";
+
+      this.turnLabel = new Label();
+      this.addChild(this.turnLabel);
+      this.turnLabel.x = core.width / 2 - this.turnLabel.width / 2;
+      this.turnLabel.y = 850;
+      this.turnLabel.font = fontStyle;
+      this.turnLabel.color = fontColor;
+
+      this.unitLabel = new Label();
+      this.addChild(this.unitLabel);
+      this.unitLabel.x = core.width / 2 - this.unitLabel.width / 2;
+      this.unitLabel.y = 900;
+      this.unitLabel.font = fontStyle;
+      this.unitLabel.color = fontColor;
+
+      this.thumbnail = new Sprite(246, 480);
+      this.thumbnail.x = 20;
+      this.thumbnail.y = bgWindow.y - 40;
+      this.addChild(this.thumbnail);
+
+      this.torch = new Sprite(64, 128);
+      this.torch.scale(2, 2);
+      this.addChild(this.torch);
+      this.torch.image = core.assets[Image_Effect[6]];
+      this.torch.frame = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31];
+      this.torch.x = core.width / 2 - this.torch.width / 2;
+      this.torch.y = 70;
+
+      var self = this;
+      this.torch.addEventListener(enchant.Event.TOUCH_START, function(params) {
+          self.torch.tl.scaleTo(3, 10, enchant.Easing.ELASTIC_EASEOUT);
+      });
+
+      this.torch.addEventListener(enchant.Event.TOUCH_END, function(params) {
+        var x = (core.width - 377) / 2;
+        var y = self.torch.y + self.torch.height + 30;
+        new InformationPopUp(self.manager, x, y);
+        self.torch.tl.scaleTo(2, 3);
+      });
+    },
+
+    _setStage: function(stage){
+      this.stage = stage;
+    },
+
+    _setManager: function(manager){
+      this.manager = manager;
+    },
+
+    updateTurn: function(turn){
+      this.turnLabel.text = "Round: " + turn;
+    },
+
+    updateUnit: function(name){
+      this.unitLabel.text = name;
+    },
+
+    updateWindowInfo: function(activeUnit){
+      this.thumbnail.image = activeUnit.thumbImage;
+    }
+  });
+
+  var InformationPopUp = Class.create(Group, {
+    initialize: function(manager, x, y){
+      Group.call(this);
+      core.currentScene.addChild(this);
+
+      manager.sndManager.playFX(Audio[2]);
+
+      var windowGroup = new Group();
+      windowGroup.x = x;
+      windowGroup.y = y;
+      this.addChild(windowGroup);
+
+      var windowSprite = new Sprite(377, 212);
+      windowSprite.image = core.assets[Image_UI[14]];
+      windowGroup.addChild(windowSprite);
+
+      var settingsGroup = new Group();
+      settingsGroup.x = 64;
+      settingsGroup.y = 32;
+      windowGroup.addChild(settingsGroup);
+
+      var fontColor = "rgba(255, 255, 105, 1.0)";
+      var fontStyle = "16px 'century', arial, sans-serif";
+
+      var stageLabel = new Label();
+
+      var self = this;
+      var cancelBtnSprite = new Sprite(64, 64);
+      cancelBtnSprite.image = core.assets[Image_UI[19]];
+      cancelBtnSprite.x = windowSprite.width - 48;
+      cancelBtnSprite.y = y - 250;
+
+      windowGroup.addChild(cancelBtnSprite);
+
+      windowGroup.originX = 256;
+      windowGroup.originY = 256;
+      windowGroup.scaleX = 0.7;
+      windowGroup.scaleY = 0.7;
+      windowGroup.tl.scaleTo(1, 10, enchant.Easing.ELASTIC_EASEOUT).then(function(){
+        cancelBtnSprite.addEventListener("touchstart", function(params){
+          cancelBtnSprite.tl.scaleTo(1.1, 10, enchant.Easing.ELASTIC_EASEOUT);
+        });
+
+        cancelBtnSprite.addEventListener("touchend", function(params){
+          cancelBtnSprite.tl.scaleTo(0.9, 3).and().fadeTo(0, 5);
+          windowSprite.tl.fadeTo(0, 5).then(function(){
+            manager.sndManager.playFX(Audio[2]);
+            core.currentScene.removeChild(this);
+          });
+        });
+      });
+    }
+  });
+
+  var SoundManager = Class.create(Sprite, {
+    initialize: function(){
+      Sprite.call(this, 1, 1);
+      this.volume = 1;
+
+      this.battleBgmPlaying = false;
+      this.fieldBgmPlaying = false;
+    },
+
+    playBattleBGM: function(){
+      this.battleBgmPlaying = true;
+      if(this.fieldBgmPlaying){
+        this.fieldBgmPlaying = false;
+        core.assets[Audio[0]].stop();
+      }
+
+      core.assets[Audio[1]].play();
+      if(core.assets[Audio[1]].src){
+        core.assets[Audio[1]].src.loop = true;
+      } else {
+        core.currentScene.addChild(this);
+      }
+      core.assets[Audio[1]].volume = this.volume * 0.5;
+    },
+
+    playFieldBGM: function(){
+      this.fieldBgmPlaying = true;
+      if(this.battleBgmPlaying){
+        this.battleBgmPlaying = false;
+        core.assets[Audio[1]].stop();
+      }
+
+      core.assets[Audio[0]].play();
+      if(core.assets[Audio[0]].src){
+        core.assets[Audio[0]].src.loop = true;
+      } else {
+        core.currentScene.addChild(this);
+      }
+      core.assets[Audio[0]].volume = this.volume * 0.5;
+    },
+
+    playFX: function(name){
+      var fx = core.assets[name].clone();
+      fx.play();
+      fx.volume = this.volume;
+    },
+
+    pauseBGM: function(){
+      if(core.isBattle){
+        this.battleBgmPlaying = false;
+        core.assets[Audio[1]].pause();
+      } else {
+        this.fieldBgmPlaying= false;
+        core.assets[Audio[0]].pause();
+      }
+    },
+
+    stopBGM: function(){
+      if(core.isBattle){
+        this.battleBgmPlaying = false;
+        core.assets[Audio[1]].stop();
+      } else {
+        this.fieldBgmPlaying = false;
+        core.assets[Audio[0]].stop();
+      }
+    },
+
+    volumeUp: function(){
+      this.volumeUp += 0.05;
+      if(this.volume > 1){
+        this.volume = 1;
+      }
+      console.log("volume ", this.volume);
+      if(core.isBattle){
+        core.assets[Audio[1]].volume = this.volume * 0.3;
+        this.playFX(Audio[2]);
+      } else {
+        core.assets[Audio[0]].volume = this.volume * 0.3;
+        this.playFX(Audio[2]);
+      }
+
+    },
+
+    volumeDown: function(){
+      this.volumeDown -= 0.05;
+      if(this.volume < 0){
+        this.volume = 0;
+      }
+
+      console.log("volume ", this.volume);
+      if(core.isBattle){
+        core.assets[Audio[1]].volume = this.volume * 0.3;
+        this.playFX(Audio[2]);
+      } else {
+        core.assets[Audio[0]].volume = this.volume * 0.3;
+        this.playFX(Audio[2]);
+      }
+    },
+
+    getVolume: function(){
+      return this.volume;
+    },
+
+    onenterframe: function(){
+      if(this.battleBgmPlaying){
+        core.assets[Audio[1]].play();
+
+      }
+      if(this.fieldBgmPlaying){
+        core.assets[Audio[0]].play();
+      }
+    }
   });
 
   var Effect = Class.create(Sprite, {
-    initialize: function(imageSource, w, h){
+    initialize: function(imageSource, w, h, frame){
       Sprite.call(this, w, h);
       this.image = core.assets[imageSource];
       this.touchEnabled = false;
+      this.frame = frame;
     }
   });
 
   // Battle Scene
-  core.battle = function(battleID){
+  core.battle = function(){
     core.isBattle = true;
 
     var scene = new Scene(core.width, core.height);
-    var statusWindow = new StatusWindow();
-    var manager = new Manager(statusWindow, scene);
+    var manager = core.manager;
+    manager.sndManager.playBattleBGM();
+    manager.sndManager.fieldBgmPlaying = false;
+    manager.setStatusWindow(manager.statusWindow, scene);
 
     var ZombieAAnimationData = {
       idleImage: core.assets[Image_ZombieA[1]],
@@ -1355,7 +2059,7 @@ window.onload = function(){
     var undeadC = new ZombieC(7, ZombieCAnimationData);
     var undeadC2 = new ZombieC(8, ZombieCAnimationData);
 
-    var horde = new EnemySquad(undeadA, undeadB, undeadC, undeadC2);
+    var horde = new EnemySquad(2, undeadA, undeadB, undeadC, undeadC2);
     scene.addChild(horde);
 
     var squad = playerStatus.squad;
@@ -1433,19 +2137,20 @@ window.onload = function(){
     var stage = new Stage(core.rootScene, bgData);
 
     var statusWindow = new StatusWindow();
-    stage.setWindow(statusWindow);
 
     var gang = new Gang(1, GangAnimationData);
     var police = new Police(2, PoliceAnimationData);
     var cheerLeader = new CheerLeader(3, CLeaderAnimationData);
     var nurse = new Nurse(4, NurseAnimationData);
 
-    var squad = new Squad(gang, cheerLeader, nurse, police);
+    var squad = new Squad(1, gang, cheerLeader, nurse, police);
 
     stage.addChild(squad);
     stage.setSquad(squad);
 
-    playerStatus.squad = squad;
+    var manager = new Manager(statusWindow, core.rootScene);
+    manager.sndManager.playFieldBGM();
+    manager.addSquad(squad);
 
     var trigger1 = new EventTrigger(1500, squad.position[1].collisionRange);
     stage.addObject(trigger1);
@@ -1453,8 +2158,12 @@ window.onload = function(){
     core.rootScene.addEventListener("enterframe", function(){
       if(trigger1.intersect(squad.position[1].collisionRange) && trigger1.eventGenerated == false){
         core.pushScene(core.battle());
+        trigger1.eventGenerated = true;
       }
     });
+
+    core.manager = manager;
+    playerStatus.squad = squad;
 
   }; // End of core.onload
 
