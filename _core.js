@@ -112,6 +112,8 @@ window.onload = function(){
     "./Assets/Custom/Effect/effect_sheet_1.png", // 4
     "./Assets/Custom/Effect/effect_sheet_2.png", // 5
     "./Assets/Custom/Effect/icon_danger.png", // 6
+    "./Assets/Custom/Effect/Critical_Hit_Logo.png", // 7
+    "./Assets/Custom/Effect/hit_effect.png", // 8
   ];
 
   var Image_UI = [
@@ -135,6 +137,8 @@ window.onload = function(){
     "./Assets/Sprites_UI/dialogue_3.png", // 17
     "./Assets/Sub_Assets/cancelBtn.png", // 18
     "./Assets/Sub_Assets/cancelBtn_small.png", // 19
+    "./Assets/Sprites_UI/targetIcon.png", // 20
+    "./Assets/Sprites_UI/confirm-btn.png", // 21
   ];
 
   var Image_Character_H1_G1 = [
@@ -239,6 +243,13 @@ window.onload = function(){
     "./Assets/Custom/Enemies/ZombieBoss/Boss_Dead1.png", // 7
   ];
 
+  var Image_Icons = [
+    "./Assets/Sprites_UI/Skill_Icons/H1_skill_spritesheet.png", // 0
+    "./Assets/Sprites_UI/Skill_Icons/H2_skill_spritesheet.png", // 1
+    "./Assets/Sprites_UI/Skill_Icons/H3_skill_spritesheet.png", // 2
+    "./Assets/Sprites_UI/Skill_Icons/H4_skill_spritesheet.png", // 3
+  ];
+
   var Audio = [
     "./Assets/Sound/music/field.mp3", // 0 (field bgm)
     "./Assets/Sound/music/battle.mp3", // 1 (battle bgm)
@@ -262,6 +273,7 @@ window.onload = function(){
   core.preload(Image_ZombieB);
   core.preload(Image_ZombieC);
   core.preload(Image_Volker);
+  core.preload(Image_Icons);
   core.preload(Audio);
 
 
@@ -286,10 +298,6 @@ window.onload = function(){
       return min + temp;
     },
 
-    produceRandPos: function(){
-
-    },
-
     beginUIShield: function(){
       if(!Utils.shieldSprite){
         var shieldSprite = new Sprite(core.width, core.height);
@@ -307,7 +315,6 @@ window.onload = function(){
       }
     }
   };
-
 
   // Class
   var Stage = Class.create({
@@ -557,6 +564,7 @@ window.onload = function(){
       collisionRange.touchEnabled = true;
       collisionRange.backgroundColor = "rgb(228, 198, 0)";
       collisionRange.opacity = 0.2;
+      collisionRange.visible = false;
       this.collisionRange = collisionRange;
       this.addChild(collisionRange);
 
@@ -606,16 +614,21 @@ window.onload = function(){
         speed: stats.speed,
         hpMax: stats.hpMax,
         mpMax: stats.mpMax,
+        apMax: stats.apMax,
         scout: stats.scout,
         disposal: stats.disposal,
+        skillList: stats.skillList
       };
       this.stats.hp = this.stats.hpMax;
       this.stats.mp = this.stats.mpMax;
+      this.stats.ap = this.stats.apMax;
 
       var self = this;
       collisionRange.addEventListener("touchend", function(e){
         console.log(self.stats.name + " (" + self.stats.job + ")" + "position: " + self.position);
-        var popup = new Profile(self);
+        if(self instanceof Survivor){
+          self.squad.manager.statusWindow.updateWindowInfo(self);
+        }
       });
 
       indicator.addEventListener("enterframe", function(){
@@ -668,23 +681,39 @@ window.onload = function(){
     },
 
     getHPMax: function() {
-        return this.stats.hpMax;
+      return this.stats.hpMax;
     },
 
     getHP: function() {
-        return this.stats.hp;
+      return Math.ceil(this.stats.hp);
     },
 
     getMPMax: function() {
-        return this.stats.mpMax;
+      return this.stats.mpMax;
     },
 
     getMP: function() {
-        return this.stats.mp;
+      return Math.ceil(this.stats.mp);
+    },
+
+    getAPMax: function(){
+      return this.stats.apMax;
+    },
+
+    getAP: function(){
+      return this.stats.ap;
+    },
+
+    getSkillById: function(id){
+      return this.stats.skillList[id - 1];
     },
 
     getImage: function(){
       return this.thumbImage;
+    },
+
+    getSkillImage: function(clickedUnit){
+      return clickedUnit.skillSpriteSheet;
     },
 
     // Automatically called functions
@@ -738,8 +767,10 @@ window.onload = function(){
 
     attack: function(target){
       Utils.beginUIShield();
+      this.setActive(false);
+
       var damage;
-      var baseDamage = this.stats.attack;
+      var baseDamage = this.stats.damage;
       // variance : -0.5 ~ 0.5
       var variance = Math.random() - 0.5;
       var variableDamage = (baseDamage / 2) * variance;
@@ -758,33 +789,40 @@ window.onload = function(){
       }
 
       damage = Math.ceil(damage);
-
-      if(damage > 0){
+      var self = this;
+      if(damage >= 0){
         var beforeHP = target.getHP();
         var afterHp = target.takeDamage(damage);
 
-        this.manager.sndManager.playFX(Audio[3]);
+        this.squad.manager.sndManager.playFX(Audio[3]);
 
         if(isCritical){
-          var alertWindow = new AlertWindow("Critical!", this.manager);
-          var self = this;
-          alertWindow.onTouch = function(){
-            if(afterHp <= 0){
-              var alertWindow = new AlertWindow("Death...", self.manager);
-              alertWindow.onTouch = function(){
-                target.deathBlow();
-                self.manager.endTurn();
-              };
-            } else {
-              self.manager.endTurn();
-            }
-          };
+          var critical = new Sprite(573, 350);
+          critical.image = core.assets[Image_Effect[7]];
+          critical.x = 1000 - 286;
+          critical.y = 150;
+          core.currentScene.addChild(critical);
+          critical.tl.fadeIn(20).delay(30).fadeOut(10).then(function(){
+            core.currentScene.removeChild(critical);
+            delete critical;
+          });
+        }
+
+        if (afterHp <= 0){
+          console.log("this unit is dead");
+          target.tl.delay(30).fadeOut(60).then(target.deathBlow()).delay(30).then(self.squad.manager.endTurn());
+          // self.squad.manager.endTurn();
+        } else {
+          setTimeout(function(){
+            self.squad.manager.endTurn();
+          }, 2000);
         }
       }
     },
 
     deathBlow: function(){
       this.squad.manager.sndManager.playFX(Audio[4]);
+
       this.squad.removeUnit(this);
       this.counter = 1;
       this.isDead = true;
@@ -797,33 +835,31 @@ window.onload = function(){
     },
   });
 
-  var ShieldWindow = Class.create(Scene, {
+  var ResultWindow = Class.create(Sprite, {
     initialize: function(manager){
-      Scene.call(this);
-      core.pushScene(this);
+      Sprite.call(this, core.width, core.height);
+      core.currentScene.addChild(this);
 
       manager.sndManager.playFX(Audio[2]);
 
-      var shieldSprite = new Sprite(core.width, core.height);
-      shieldSprite.image = core.assets[Image_UI[4]];
-      shieldSprite.opacity = 0.5;
-      this.addChild(shieldSprite);
+      this.image = core.assets[Image_UI[4]];
+      this.opacity = 0.5;
 
       var self = this;
-      shieldSprite.addEventListener(enchant.Event.TOUCH_END, function(params) {
+      this.addEventListener(enchant.Event.TOUCH_END, function(params) {
           if (self.onTouch) {
-              manager.sndManager.playFX(sndClick);
-              core.popScene();
+              manager.sndManager.playFX(Audio[4]);
+              core.currentScene.removeChild(self);
               self.onTouch();
           }
       });
     }
   });
 
-  var AlertWindow = Class.create(Scene, {
+  var AlertWindow = Class.create(Sprite, {
     initialize: function(message, manager){
-      Scene.call(this);
-      core.pushScene(this);
+      Sprite.call(this);
+      core.currentScene.addChild(this);
 
       var shieldSprite = new Sprite(core.width, core.height);
       shieldSprite.image = core.assets[Image_UI[4]];
@@ -988,6 +1024,8 @@ window.onload = function(){
     initialize: function(id, stats, animationData){
       BaseUnit.call(this, id, stats, 516, 427);
 
+      this.action = "idle";
+
       // State
       this.isMoving = false;
       this.isMovingBack = false;
@@ -1020,11 +1058,27 @@ window.onload = function(){
       this.shadow.x = this.collisionRange.x + (this.collisionRange.width - this.shadow.width) / 2;
       this.shadow.y = this.healthBackSprite.y - 60;
 
+
       this.addEventListener("enterframe", function(){
         // In battle, moving cannot be performed.
         if(core.isBattle){
-          this.body.image = animationData.idleImage;
-          this.body.frame = animationData.idleFrame;
+          switch (this.action) {
+            case "attack":
+              this.body.image = animationData.attackImage;
+              this.body.frame = animationData.attackFrame;
+              break;
+            case "hit":
+              this.body.image = animationData.hitImage;
+              this.body.frame = animationData.hitFrame;
+              break;
+            case "idle":
+              this.body.image = animationData.idleImage;
+              this.body.frame = animationData.idleFrame;
+              break;
+            default:
+              this.body.image = animationData.idleImage;
+              this.body.frame = animationData.idleFrame;
+          }
         } else {
           if(core.input.right){
             this.isMoving = true;
@@ -1058,6 +1112,9 @@ window.onload = function(){
       this.body.frame = animationData.idleFrame;
       this.body.scaleX = -1;
 
+      this.indicator.x = this.collisionRange.x;
+      this.indicator.y = this.collisionRange.y - 50;
+
       this.collisionRange.x = this.body.x + 170;
       this.collisionRange.y = this.body.y + 50;
 
@@ -1073,9 +1130,29 @@ window.onload = function(){
       this.shadow.x = this.collisionRange.x + (this.collisionRange.width - this.shadow.width) / 2;
       this.shadow.y = this.healthBackSprite.y - 60;
 
-      this.addEventListener("enterframe", function(){
+      // this.targetArrow.x = this.collisionRange.x + (this.collisionRange.width - this.targetArrow.width) / 2;
+      // this.targetArrow.y = this.collisionRange.y - this.targetArrow.height / 2;
 
-      }); // End of enterframe function of Zombie
+      this.addEventListener("enterframe", function(){
+        switch (this.action) {
+          case "attack":
+            this.body.image = animationData.attackImage;
+            this.body.frame = animationData.attackFrame;
+            break;
+          case "hit":
+            this.body.image = animationData.hitImage;
+            this.body.frame = animationData.hitFrame;
+            break;
+          case "idle":
+            this.body.image = animationData.idleImage;
+            this.body.frame = animationData.idleFrame;
+            break;
+          default:
+            this.body.image = animationData.idleImage;
+            this.body.frame = animationData.idleFrame;
+        }
+
+      });
     }
   });
 
@@ -1090,6 +1167,9 @@ window.onload = function(){
       this.body.image = animationData.idleImage;
       this.body.frame = animationData.idleFrame;
       this.body.scaleX = -1;
+
+      this.indicator.x = this.collisionRange.x;
+      this.indicator.y = this.collisionRange.y - 50;
 
       this.collisionRange.x = this.body.x + 145;
       this.collisionRange.y = this.body.y + 50;
@@ -1106,8 +1186,29 @@ window.onload = function(){
       this.shadow.x = this.collisionRange.x + (this.collisionRange.width - this.shadow.width) / 2;
       this.shadow.y = this.healthBackSprite.y - 60;
 
+      // this.targetArrow.x = this.collisionRange.x + (this.collisionRange.width - this.targetArrow.width) / 2;
+      // this.targetArrow.y = this.collisionRange.y - this.targetArrow.height / 2;
+
       this.addEventListener("enterframe", function(){
-      }); // End of enterframe function of Boss
+        switch (this.action) {
+          case "attack":
+            this.body.image = animationData.attackImage;
+            this.body.frame = animationData.attackFrame;
+            break;
+          case "hit":
+            this.body.image = animationData.hitImage;
+            this.body.frame = animationData.hitFrame;
+            break;
+          case "idle":
+            this.body.image = animationData.idleImage;
+            this.body.frame = animationData.idleFrame;
+            break;
+          default:
+            this.body.image = animationData.idleImage;
+            this.body.frame = animationData.idleFrame;
+        }
+
+      });
     }
   });
 
@@ -1120,6 +1221,7 @@ window.onload = function(){
 
       this.unitCountInitial = 0;
       this.unitList = [];
+      this.name = null;
 
       // Access each unit by this.position[posIndex]
       this.position = {
@@ -1127,6 +1229,13 @@ window.onload = function(){
         2: {},
         3: {},
         4: {}
+      };
+
+      this.coordinate = {
+        1: {x: 150, y:400},
+        2: {x: 320, y:400},
+        3: {x: 490, y:400},
+        4: {x: 670, y:400}
       };
 
       this.addChild(unit1);
@@ -1146,6 +1255,11 @@ window.onload = function(){
 
     _setManager: function(manager){
       this.manager = manager;
+    },
+
+    setStatusWindow: function(statusWindow){
+      this.statusWindow = statusWindow;
+      statusWindow.squad = this;
     },
 
     isActive: function(){
@@ -1231,7 +1345,8 @@ window.onload = function(){
       if(this.activeUnit){
         return this.activeUnit;
       } else {
-        return this.unitList[0];
+        var temp = this.unitList[this.manager.internalTurnCounter % this.unitList.length];
+        return temp;
       }
     },
 
@@ -1261,9 +1376,25 @@ window.onload = function(){
     initialize: function(id, unit1, unit2, unit3, unit4){
       Squad.call(this, id, unit1, unit2, unit3, unit4);
 
+      this.unitList = [];
+
       this.x = 500;
       this.y = 200;
       this.id = id;
+
+      this.position = {
+        1: {},
+        2: {},
+        3: {},
+        4: {}
+      };
+
+      this.coordinate = {
+        1: {x: 1110, y:400},
+        2: {x: 1280, y:400},
+        3: {x: 1450, y:400},
+        4: {x: 1620, y:400}
+      };
 
       this.initialPositionUnit(unit1, 1);
       this.initialPositionUnit(unit2, 2);
@@ -1308,14 +1439,49 @@ window.onload = function(){
       console.log(this.position[4].position);
     },
 
-    simulatePlay: function(){
-    }
+    simulatePlay: function(manager, activeUnit){
+      var unit = activeUnit;
+      console.log(unit.stats.name);
+      var command = this.chooseCommand(unit);
+
+      var targetPos = command.targetPos;
+      var targetSquad = manager.getNonActiveSquad();
+      var targetList = [];
+
+      for (var i = 0; i < command.targetPos.length; i++) {
+        if(targetSquad.position[command.targetPos[i]].isDead == false){
+          targetList.push(targetSquad.position[command.targetPos[i]]);
+        }
+      }
+
+      if(targetList.length > 0){
+        setTimeout(function(){
+          manager.actionTurn(manager, targetList, command);
+        }, 2000);
+      } else {
+        setTimeout(function(){
+          manager.skipTurn();
+        }, 2000);
+      }
+    },
+
+    chooseCommand: function(activeUnit){
+      var randomIndex;
+      if(Math.random() < 0.3){
+        randomIndex = 2;
+      } else if (Math.random() > 0.6){
+        randomIndex = 1;
+      } else {
+        randomIndex = 3;
+      }
+      return activeUnit.getSkillById(1);
+    },
   });
 
   // Units Class
 
   var Gang = Class.create(Survivor, {
-    initialize: function(id, animationData){
+    initialize: function(id, animationData, skillData){
       Survivor.call(this, id, {
         lv: 1,
         exp: 0,
@@ -1337,17 +1503,20 @@ window.onload = function(){
         speed: 6,
         hpMax: 25,
         mpMax: 100,
+        apMax: 1,
         scout: 0.23,
         disposal: 0.46,
+        skillList: [skillData[1], skillData[2], skillData[3], skillData[4], skillData[99], skillData[100]]
       }, animationData);
       this.thumbImage = core.assets[Image_Character_H1_G1[0]];
       this.thumbWidthSize = 246;
       this.thumbHeightSize = 480;
+      this.skillSpriteSheet = core.assets[Image_Icons[0]];
     },
   });
 
   var Police = Class.create(Survivor, {
-    initialize: function(id, animationData){
+    initialize: function(id, animationData, skillData){
       Survivor.call(this, id, {
         lv: 1,
         exp: 0,
@@ -1369,17 +1538,20 @@ window.onload = function(){
         speed: 4,
         hpMax: 30,
         mpMax: 100,
+        apMax: 1,
         scout: 0.12,
         disposal: 0.37,
+        skillList: [skillData[5], skillData[6], skillData[7], skillData[8], skillData[99], skillData[100]]
       }, animationData);
       this.thumbImage = core.assets[Image_Character_H2_G3[0]];
       this.thumbWidthSize = 211;
       this.thumbHeightSize = 480;
+      this.skillSpriteSheet = core.assets[Image_Icons[1]];
     },
   });
 
   var CheerLeader = Class.create(Survivor, {
-    initialize: function(id, animationData){
+    initialize: function(id, animationData, skillData){
       Survivor.call(this, id, {
         lv: 1,
         exp: 0,
@@ -1401,17 +1573,20 @@ window.onload = function(){
         speed: 4,
         hpMax: 22,
         mpMax: 100,
+        apMax: 1,
         scout: 0.14,
         disposal: 0.17,
+        skillList: [skillData[9], skillData[10], skillData[11], skillData[12], skillData[99], skillData[100]]
       }, animationData);
       this.thumbImage = core.assets[Image_Character_H3_G4[0]];
       this.thumbWidthSize = 243;
       this.thumbHeightSize = 480;
+      this.skillSpriteSheet = core.assets[Image_Icons[2]];
     },
   });
 
   var Nurse = Class.create(Survivor, {
-    initialize: function(id, animationData){
+    initialize: function(id, animationData, skillData){
       Survivor.call(this, id, {
         lv: 1,
         exp: 0,
@@ -1431,19 +1606,22 @@ window.onload = function(){
         resistDeath: 0.12,
         virtue: 0.03,
         speed: 4,
-        hpMax: 21,
+        hpMax: 23,
         mpMax: 100,
+        apMax: 1,
         scout: 0.11,
         disposal: 0.05,
+        skillList: [skillData[13], skillData[14], skillData[15], skillData[16], skillData[99], skillData[100]]
       }, animationData);
       this.thumbImage = core.assets[Image_Character_H3_NoGun[0]];
       this.thumbWidthSize = 243;
       this.thumbHeightSize = 480;
+      this.skillSpriteSheet = core.assets[Image_Icons[3]];
     },
   });
 
   var ZombieA = Class.create(Zombie, {
-    initialize: function(id, animationData){
+    initialize: function(id, animationData, skillData){
       Zombie.call(this, id, {
         lv: 1,
         exp: 0,
@@ -1463,10 +1641,12 @@ window.onload = function(){
         resistDeath: 0,
         virtue: 0,
         speed: 3,
-        hpMax: 17,
+        hpMax: 19,
         mpMax: 100,
+        apMax: 1,
         scout: 0.1,
         disposal: 0,
+        skillList: [skillData[101], skillData[102], skillData[103]]
       }, animationData);
       this.body.scaleX = -1;
       this.thumbImage = core.assets[Image_ZombieA[0]];
@@ -1476,7 +1656,7 @@ window.onload = function(){
   });
 
   var ZombieB = Class.create(Zombie, {
-    initialize: function(id, animationData){
+    initialize: function(id, animationData, skillData){
       Zombie.call(this, id, {
         lv: 1,
         exp: 0,
@@ -1496,10 +1676,12 @@ window.onload = function(){
         resistDeath: 0,
         virtue: 0,
         speed: 2,
-        hpMax: 19,
+        hpMax: 24,
         mpMax: 100,
+        apMax: 1,
         scout: 0.1,
         disposal: 0,
+        skillList: [skillData[101], skillData[102], skillData[103]]
       }, animationData);
       this.body.scaleX = -1;
       this.thumbImage = core.assets[Image_ZombieB[0]];
@@ -1509,7 +1691,7 @@ window.onload = function(){
   });
 
   var ZombieC = Class.create(Zombie, {
-    initialize: function(id, animationData){
+    initialize: function(id, animationData, skillData){
       Zombie.call(this, id, {
         lv: 1,
         exp: 0,
@@ -1529,10 +1711,12 @@ window.onload = function(){
         resistDeath: 0,
         virtue: 0,
         speed: 5,
-        hpMax: 21,
+        hpMax: 26,
         mpMax: 100,
+        apMax: 1,
         scout: 0.1,
         disposal: 0,
+        skillList: [skillData[101], skillData[102], skillData[103]]
       }, animationData);
       this.body.scaleX = -1;
       this.thumbImage = core.assets[Image_ZombieC[0]];
@@ -1542,7 +1726,7 @@ window.onload = function(){
   });
 
   var Volker = Class.create(ZombieBoss, {
-    initialize: function(id, animationData){
+    initialize: function(id, animationData, skillData){
       Zombie.call(this, id, {
         lv: 1,
         exp: 0,
@@ -1562,10 +1746,12 @@ window.onload = function(){
         resistDeath: 0,
         virtue: 0,
         speed: 4,
-        hpMax: 45,
+        hpMax: 55,
         mpMax: 100,
+        apMax: 1,
         scout: 0.1,
         disposal: 0,
+        skillList: [skillData[101], skillData[102], skillData[103]]
       }, animationData);
       this.body.scaleX = -1;
       this.thumbImage = core.assets[Image_Volker[0]];
@@ -1584,6 +1770,7 @@ window.onload = function(){
 
       this.backgroundColor = "rgb(236, 58, 19)";
       this.opacity = 0.5;
+      this.visible = false;
 
       var self = this;
       this.addEventListener("enterframe", function(){
@@ -1599,6 +1786,10 @@ window.onload = function(){
       this.squadList = [];
       this.unitList = [];
       this.turnCounter = 0;
+      this.internalTurnCounter = 0;
+
+      this.attacker = null;
+      this.command = null;
 
       this.setStatusWindow(statusWindow, scene);
 
@@ -1652,9 +1843,14 @@ window.onload = function(){
       return this.unitList[number - 1];
     },
 
-    beginBattle: function(squad, enemySquad){
-      this.addSquad(squad);
-      this.addSquad(enemySquad);
+    setCommand: function(unit, skillID){
+      this.attacker = unit;
+      this.command = this.attacker.getSkillById(skillID);
+      console.log(this.attacker.stats.name + " " + this.command.name + " is ready to generated");
+    },
+
+    beginBattle: function(){
+
       this.startTurn();
     },
 
@@ -1662,118 +1858,632 @@ window.onload = function(){
       Utils.endUIShield();
       var squad = this.getActiveSquad();
       squad.setActive(true);
+
+      var activeUnit = squad.getActiveUnit();
+      activeUnit.setActive(true);
+
       this.updateTurn();
 
       if(squad instanceof EnemySquad){
         Utils.beginUIShield();
-        squad.simulatePlay();
+        squad.simulatePlay(this, activeUnit);
       }
+
+
       console.log("Turn Started");
     },
 
     updateTurn: function(){
-      this.statusWindow.updateTurn(this.turnCounter);
-      this.statusWindow.updateUnit(this.getActiveUnit().stats.name);
+      var message = new makeMessage(this.getActiveUnit().stats.name + "'s Turn'", core.width / 2 - 400, 230);
+      this.statusWindow.addChild(message);
+
+      var self = this;
+      setTimeout(function(){
+        self.statusWindow.removeChild(message);
+        delete message;
+      }, 3000);
+      if(this.getActiveSquad() instanceof EnemySquad){
+        return;
+      }
       this.statusWindow.updateWindowInfo(this.getActiveUnit());
       this.sndManager.playFX(Audio[5]);
 
-      this.commandTurn();
+      console.log("Turn Updated");
     },
 
     commandTurn: function(){
-      var command;
+      this.sndManager.playFX(Audio[5]);
+      this.drawTargetSprite(this, this.command);
+    },
+
+    drawTargetSprite: function(manager, command){
+      if(this.targetSpriteLayer){
+        this.statusWindow.removeChild(this.targetSpriteLayer);
+        delete this.targetSpriteLayer;
+      }
+
+      this.targetSpriteLayer = new Group();
+      var targetPos = command.targetPos;
+      var targetSquad = this.getNonActiveSquad();
+      var targetList = [];
+
+      for (var i = 0; i < command.targetPos.length; i++) {
+        if(targetSquad.position[command.targetPos[i]].isDead == false){
+          var targetMark = new Sprite(128, 128);
+          targetMark.image = core.assets[Image_UI[20]];
+          this.targetSpriteLayer.addChild(targetMark);
+          targetMark.x = targetSquad.coordinate[command.targetPos[i]].x + 64;
+          targetMark.y = targetSquad.coordinate[command.targetPos[i]].y - 64;
+
+          targetList.push(targetSquad.position[command.targetPos[i]]);
+        }
+      }
+
+      manager.statusWindow.addChild(this.targetSpriteLayer);
+
+      if(targetList.length > 0){
+        var confirmBtnSprite = new Sprite(300, 96);
+        confirmBtnSprite.image = core.assets[Image_UI[21]];
+        this.targetSpriteLayer.addChild(confirmBtnSprite);
+        confirmBtnSprite.x = (core.width - confirmBtnSprite.width) / 2;
+        confirmBtnSprite.y = 450;
+
+        var self = this;
+        confirmBtnSprite.addEventListener("touchstart", function(e){
+          manager.sndManager.playFX(Audio[2]);
+          confirmBtnSprite.tl.scaleTo(1.1, 10, enchant.Easing.ELASTIC_EASEOUT);
+        });
+
+        confirmBtnSprite.addEventListener("touchend", function(e){
+          confirmBtnSprite.tl.scaleTo(0.9, 3).then(function(){
+            self.targetSpriteLayer.removeChild(confirmBtnSprite);
+          }).then(function(){
+            self.actionTurn(manager, targetList, command);
+            self.statusWindow.removeChild(self.targetSpriteLayer);
+            delete self.targetSpriteLayer;
+          });
+        });
+      }
+    },
+
+    actionTurn: function(manager, targetList, command){
+      if(manager.getActiveSquad() instanceof EnemySquad){
+        Utils.beginUIShield();
+
+        var attacker = manager.getActiveUnit();
+        var originX = attacker.x;
+        var originY = attacker.y;
+
+        var stageX = 170;
+        var stageY = -130;
+
+        attacker.tl.scaleTo(2, 10, enchant.Easing.LINEAR).and().moveTo(stageX, stageY, 0, enchant.Easing.LINEAR).delay(10).then(function(){
+          attacker.action = "attack";
+        }).delay(45).then(function(){
+          attacker.action = "idle";
+        }).scaleTo(1, 10, enchant.Easing.LINEAR).and().moveBy((originX - stageX), (originY - stageY), 0, enchant.Easing.LINEAR);
+
+        var targetNumber = targetList.length;
+        switch (targetNumber) {
+        // 1) When target is one
+          case 1:
+          var enemy1StageX = -190 + (3 * 200);
+          var enemy1StageY = -130;
+          var target1 = targetList[0];
+
+          var enemy1OriginX = target1.x;
+          var enemy1OriginY = target1.y;
+
+          target1.tl.scaleTo(2, 10, enchant.Easing.LINEAR).and().moveTo(enemy1StageX, enemy1StageY, 0, enchant.Easing.LINEAR).delay(10).then(function(){
+            target1.action = "hit";
+
+            attacker.attack(target1);
+
+          }).delay(45).then(function(){
+            target1.action = "idle";
+          }).scaleTo(1, 10, enchant.Easing.LINEAR).and().moveBy((enemy1OriginX - enemy1StageX), (enemy1OriginY - enemy1StageY), 0, enchant.Easing.LINEAR);
+            break;
+
+        // 2) When target is two
+          case 2:
+
+          var enemy1StageX = -190 + (3 * 200);
+          var enemy1StageY = -130;
+          var target1 = targetList[0];
+
+          var enemy1OriginX = target1.x;
+          var enemy1OriginY = target1.y;
+
+          target1.tl.scaleTo(2, 10, enchant.Easing.LINEAR).and().moveTo(enemy1StageX, enemy1StageY, 0, enchant.Easing.LINEAR).delay(10).then(function(){
+            target1.action = "hit";
+
+            attacker.attack(target1);
+
+          }).delay(45).then(function(){
+            target1.action = "idle";
+          }).scaleTo(1, 10, enchant.Easing.LINEAR).and().moveBy((enemy1OriginX - enemy1StageX), (enemy1OriginY - enemy1StageY), 0, enchant.Easing.LINEAR);
+
+          var enemy2StageX = -190 + (2 * 200);
+          var enemy2StageY = -130;
+          var target2 = targetList[1];
+
+          var enemy2OriginX = target2.x;
+          var enemy2OriginY = target2.y;
+
+          target2.tl.scaleTo(2, 10, enchant.Easing.LINEAR).and().moveTo(enemy2StageX, enemy2StageY, 0, enchant.Easing.LINEAR).delay(10).then(function(){
+            target2.action = "hit";
+
+            attacker.attack(target2);
+
+          }).delay(45).then(function(){
+            target2.action = "idle";
+          }).scaleTo(1, 10, enchant.Easing.LINEAR).and().moveBy((enemy2OriginX - enemy2StageX), (enemy2OriginY - enemy2StageY), 0, enchant.Easing.LINEAR);
+            break;
+
+        // 3) When target is three
+          case 3:
+          var enemy1StageX = -190 + (3 * 200);
+          var enemy1StageY = -130;
+          var target1 = targetList[0];
+
+          var enemy1OriginX = target1.x;
+          var enemy1OriginY = target1.y;
+
+          target1.tl.scaleTo(2, 10, enchant.Easing.LINEAR).and().moveTo(enemy1StageX, enemy1StageY, 0, enchant.Easing.LINEAR).delay(10).then(function(){
+            target1.action = "hit";
+
+            attacker.attack(target1);
+
+          }).delay(45).then(function(){
+            target1.action = "idle";
+          }).scaleTo(1, 10, enchant.Easing.LINEAR).and().moveBy((enemy1OriginX - enemy1StageX), (enemy1OriginY - enemy1StageY), 0, enchant.Easing.LINEAR);
+
+          var enemy2StageX = -190 + (2 * 200);
+          var enemy2StageY = -130;
+          var target2 = targetList[1];
+
+          var enemy2OriginX = target2.x;
+          var enemy2OriginY = target2.y;
+
+          target2.tl.scaleTo(2, 10, enchant.Easing.LINEAR).and().moveTo(enemy2StageX, enemy2StageY, 0, enchant.Easing.LINEAR).delay(10).then(function(){
+            target2.action = "hit";
+
+            attacker.attack(target2);
+
+          }).delay(45).then(function(){
+            target2.action = "idle";
+          }).scaleTo(1, 10, enchant.Easing.LINEAR).and().moveBy((enemy2OriginX - enemy2StageX), (enemy2OriginY - enemy2StageY), 0, enchant.Easing.LINEAR);
+
+          var enemy3StageX = -190 + (1 * 200);
+          var enemy3StageY = -130;
+          var target3 = targetList[2];
+
+          var enemy3OriginX = target3.x;
+          var enemy3OriginY = target1.y;
+
+          target3.tl.scaleTo(2, 10, enchant.Easing.LINEAR).and().moveTo(enemy3StageX, enemy3StageY, 0, enchant.Easing.LINEAR).delay(10).then(function(){
+            target3.action = "hit";
+
+            attacker.attack(target3);
+
+          }).delay(45).then(function(){
+            target3.action = "idle";
+          }).scaleTo(1, 10, enchant.Easing.LINEAR).and().moveBy((enemy3OriginX - enemy3StageX), (enemy3OriginY - enemy3StageY), 0, enchant.Easing.LINEAR);
+            break;
+
+        // 4) When target is four
+          case 4:
+          var enemy1StageX = -190 + (3 * 200);
+          var enemy1StageY = -130;
+          var target1 = targetList[0];
+
+          var enemy1OriginX = target1.x;
+          var enemy1OriginY = target1.y;
+
+          target1.tl.scaleTo(2, 10, enchant.Easing.LINEAR).and().moveTo(enemy1StageX, enemy1StageY, 0, enchant.Easing.LINEAR).delay(10).then(function(){
+            target1.action = "hit";
+
+            attacker.attack(target1);
+
+          }).delay(45).then(function(){
+            target1.action = "idle";
+          }).scaleTo(1, 10, enchant.Easing.LINEAR).and().moveBy((enemy1OriginX - enemy1StageX), (enemy1OriginY - enemy1StageY), 0, enchant.Easing.LINEAR);
+
+          var enemy2StageX = -190 + (2 * 200);
+          var enemy2StageY = -130;
+          var target2 = targetList[1];
+
+          var enemy2OriginX = target2.x;
+          var enemy2OriginY = target2.y;
+
+          target2.tl.scaleTo(2, 10, enchant.Easing.LINEAR).and().moveTo(enemy2StageX, enemy2StageY, 0, enchant.Easing.LINEAR).delay(10).then(function(){
+            target2.action = "hit";
+
+            attacker.attack(target2);
+
+          }).delay(45).then(function(){
+            target2.action = "idle";
+          }).scaleTo(1, 10, enchant.Easing.LINEAR).and().moveBy((enemy2OriginX - enemy2StageX), (enemy2OriginY - enemy2StageY), 0, enchant.Easing.LINEAR);
+
+          var enemy3StageX = -190 + (1 * 200);
+          var enemy3StageY = -130;
+          var target3 = targetList[2];
+
+          var enemy3OriginX = target3.x;
+          var enemy3OriginY = target3.y;
+
+          target3.tl.scaleTo(2, 10, enchant.Easing.LINEAR).and().moveTo(enemy3StageX, enemy3StageY, 0, enchant.Easing.LINEAR).delay(10).then(function(){
+            target3.action = "hit";
+
+            attacker.attack(target3);
+
+          }).delay(45).then(function(){
+            target3.action = "idle";
+          }).scaleTo(1, 10, enchant.Easing.LINEAR).and().moveBy((enemy3OriginX - enemy3StageX), (enemy3OriginY - enemy3StageY), 0, enchant.Easing.LINEAR);
+
+          var enemy4StageX = -190 + (0 * 200);
+          var enemy4StageY = -130;
+          var target4 = targetList[3];
+
+          var enemy4OriginX = target4.x;
+          var enemy4OriginY = target4.y;
+
+          target4.tl.scaleTo(2, 10, enchant.Easing.LINEAR).and().moveTo(enemy4StageX, enemy4StageY, 0, enchant.Easing.LINEAR).delay(10).then(function(){
+            target4.action = "hit";
+
+            attacker.attack(target4);
+
+          }).delay(45).then(function(){
+            target4.action = "idle";
+          }).scaleTo(1, 10, enchant.Easing.LINEAR).and().moveBy((enemy4OriginX - enemy4StageX), (enemy4OriginY - enemy4StageY), 0, enchant.Easing.LINEAR);
+            break;
+
+        }
+
+
+
+        setTimeout(function(){
+          Utils.endUIShield();
+        }, 3000);
+      } else {
+        Utils.beginUIShield();
+
+        var attacker = manager.getActiveUnit();
+        var originX = attacker.x;
+        var originY = attacker.y;
+
+        var stageX = 360;
+        var stageY = -130;
+
+        attacker.tl.scaleTo(2, 10, enchant.Easing.LINEAR).and().moveTo(stageX, stageY, 0, enchant.Easing.LINEAR).delay(10).then(function(){
+          attacker.action = "attack";
+        }).delay(45).then(function(){
+          attacker.action = "idle";
+        }).scaleTo(1, 10, enchant.Easing.LINEAR).and().moveBy((originX - stageX), (originY - stageY), 0, enchant.Easing.LINEAR);
+
+        var targetNumber = targetList.length;
+        switch (targetNumber) {
+        // 1) When target is one
+          case 1:
+          var enemy1StageX = 200 + (0 * 200);
+          var enemy1StageY = -130;
+          var target1 = targetList[0];
+
+          var enemy1OriginX = target1.x;
+          var enemy1OriginY = target1.y;
+
+          target1.tl.scaleTo(2, 10, enchant.Easing.LINEAR).and().moveTo(enemy1StageX, enemy1StageY, 0, enchant.Easing.LINEAR).delay(10).then(function(){
+            target1.action = "hit";
+
+            attacker.attack(target1);
+
+          }).delay(45).then(function(){
+            target1.action = "idle";
+          }).scaleTo(1, 10, enchant.Easing.LINEAR).and().moveBy((enemy1OriginX - enemy1StageX), (enemy1OriginY - enemy1StageY), 0, enchant.Easing.LINEAR);
+            break;
+
+        // 2) When target is two
+          case 2:
+
+          var enemy1StageX = 200 + (0 * 200);
+          var enemy1StageY = -130;
+          var target1 = targetList[0];
+
+          var enemy1OriginX = target1.x;
+          var enemy1OriginY = target1.y;
+
+          target1.tl.scaleTo(2, 10, enchant.Easing.LINEAR).and().moveTo(enemy1StageX, enemy1StageY, 0, enchant.Easing.LINEAR).delay(10).then(function(){
+            target1.action = "hit";
+
+            attacker.attack(target1);
+
+          }).delay(45).then(function(){
+            target1.action = "idle";
+          }).scaleTo(1, 10, enchant.Easing.LINEAR).and().moveBy((enemy1OriginX - enemy1StageX), (enemy1OriginY - enemy1StageY), 0, enchant.Easing.LINEAR);
+
+          var enemy2StageX = 200 + (1 * 200);
+          var enemy2StageY = -130;
+          var target2 = targetList[1];
+
+          var enemy2OriginX = target2.x;
+          var enemy2OriginY = target2.y;
+
+          target2.tl.scaleTo(2, 10, enchant.Easing.LINEAR).and().moveTo(enemy2StageX, enemy2StageY, 0, enchant.Easing.LINEAR).delay(10).then(function(){
+            target2.action = "hit";
+
+            attacker.attack(target2);
+
+          }).delay(45).then(function(){
+            target2.action = "idle";
+          }).scaleTo(1, 10, enchant.Easing.LINEAR).and().moveBy((enemy2OriginX - enemy2StageX), (enemy2OriginY - enemy2StageY), 0, enchant.Easing.LINEAR);
+            break;
+
+        // 3) When target is three
+          case 3:
+          var enemy1StageX = 200 + (0 * 200);
+          var enemy1StageY = -130;
+          var target1 = targetList[0];
+
+          var enemy1OriginX = target1.x;
+          var enemy1OriginY = target1.y;
+
+          target1.tl.scaleTo(2, 10, enchant.Easing.LINEAR).and().moveTo(enemy1StageX, enemy1StageY, 0, enchant.Easing.LINEAR).delay(10).then(function(){
+            target1.action = "hit";
+
+            attacker.attack(target1);
+
+          }).delay(45).then(function(){
+            target1.action = "idle";
+          }).scaleTo(1, 10, enchant.Easing.LINEAR).and().moveBy((enemy1OriginX - enemy1StageX), (enemy1OriginY - enemy1StageY), 0, enchant.Easing.LINEAR);
+
+          var enemy2StageX = 200 + (1 * 200);
+          var enemy2StageY = -130;
+          var target2 = targetList[1];
+
+          var enemy2OriginX = target2.x;
+          var enemy2OriginY = target2.y;
+
+          target2.tl.scaleTo(2, 10, enchant.Easing.LINEAR).and().moveTo(enemy2StageX, enemy2StageY, 0, enchant.Easing.LINEAR).delay(10).then(function(){
+            target2.action = "hit";
+
+            attacker.attack(target2);
+
+          }).delay(45).then(function(){
+            target2.action = "idle";
+          }).scaleTo(1, 10, enchant.Easing.LINEAR).and().moveBy((enemy2OriginX - enemy2StageX), (enemy2OriginY - enemy2StageY), 0, enchant.Easing.LINEAR);
+
+          var enemy3StageX = 200 + (2 * 200);
+          var enemy3StageY = -130;
+          var target3 = targetList[2];
+
+          var enemy3OriginX = target3.x;
+          var enemy3OriginY = target1.y;
+
+          target3.tl.scaleTo(2, 10, enchant.Easing.LINEAR).and().moveTo(enemy3StageX, enemy3StageY, 0, enchant.Easing.LINEAR).delay(10).then(function(){
+            target3.action = "hit";
+
+            attacker.attack(target3);
+
+          }).delay(45).then(function(){
+            target3.action = "idle";
+          }).scaleTo(1, 10, enchant.Easing.LINEAR).and().moveBy((enemy3OriginX - enemy3StageX), (enemy3OriginY - enemy3StageY), 0, enchant.Easing.LINEAR);
+            break;
+
+        // 4) When target is four
+          case 4:
+          var enemy1StageX = 200 + (0 * 200);
+          var enemy1StageY = -130;
+          var target1 = targetList[0];
+
+          var enemy1OriginX = target1.x;
+          var enemy1OriginY = target1.y;
+
+          target1.tl.scaleTo(2, 10, enchant.Easing.LINEAR).and().moveTo(enemy1StageX, enemy1StageY, 0, enchant.Easing.LINEAR).delay(10).then(function(){
+            target1.action = "hit";
+
+            attacker.attack(target1);
+
+          }).delay(45).then(function(){
+            target1.action = "idle";
+          }).scaleTo(1, 10, enchant.Easing.LINEAR).and().moveBy((enemy1OriginX - enemy1StageX), (enemy1OriginY - enemy1StageY), 0, enchant.Easing.LINEAR);
+
+          var enemy2StageX = 200 + (1 * 200);
+          var enemy2StageY = -130;
+          var target2 = targetList[1];
+
+          var enemy2OriginX = target2.x;
+          var enemy2OriginY = target2.y;
+
+          target2.tl.scaleTo(2, 10, enchant.Easing.LINEAR).and().moveTo(enemy2StageX, enemy2StageY, 0, enchant.Easing.LINEAR).delay(10).then(function(){
+            target2.action = "hit";
+
+            attacker.attack(target2);
+
+          }).delay(45).then(function(){
+            target2.action = "idle";
+          }).scaleTo(1, 10, enchant.Easing.LINEAR).and().moveBy((enemy2OriginX - enemy2StageX), (enemy2OriginY - enemy2StageY), 0, enchant.Easing.LINEAR);
+
+          var enemy3StageX = 200 + (2 * 200);
+          var enemy3StageY = -130;
+          var target3 = targetList[2];
+
+          var enemy3OriginX = target3.x;
+          var enemy3OriginY = target3.y;
+
+          target3.tl.scaleTo(2, 10, enchant.Easing.LINEAR).and().moveTo(enemy3StageX, enemy3StageY, 0, enchant.Easing.LINEAR).delay(10).then(function(){
+            target3.action = "hit";
+
+            attacker.attack(target3);
+
+          }).delay(45).then(function(){
+            target3.action = "idle";
+          }).scaleTo(1, 10, enchant.Easing.LINEAR).and().moveBy((enemy3OriginX - enemy3StageX), (enemy3OriginY - enemy3StageY), 0, enchant.Easing.LINEAR);
+
+          var enemy4StageX = 200 + (3 * 200);
+          var enemy4StageY = -130;
+          var target4 = targetList[3];
+
+          var enemy4OriginX = target4.x;
+          var enemy4OriginY = target4.y;
+
+          target4.tl.scaleTo(2, 10, enchant.Easing.LINEAR).and().moveTo(enemy4StageX, enemy4StageY, 0, enchant.Easing.LINEAR).delay(10).then(function(){
+            target4.action = "hit";
+
+            attacker.attack(target4);
+
+          }).delay(45).then(function(){
+            target4.action = "idle";
+          }).scaleTo(1, 10, enchant.Easing.LINEAR).and().moveBy((enemy4OriginX - enemy4StageX), (enemy4OriginY - enemy4StageY), 0, enchant.Easing.LINEAR);
+            break;
+
+        }
+
+        setTimeout(function(){
+          Utils.endUIShield();
+        }, 3000);
+      }
+
+      this.internalTurnCounter++;
+
     },
 
     endTurn: function(){
       var squad = this.getActiveSquad();
-      squad.setActive(false);
-
+      var unit = this.getActiveUnit();
       var winner = this.getWinner();
+
+      console.log(squad.getUnitCount());
+      console.log(this.getNonActiveSquad().getUnitCount());
+      console.log("turncounter: " + this.turnCounter);
+      console.log("internalTurncounter: " + this.internalTurnCounter);
+
       if(winner){
         var self = this;
         setTimeout(function(){
           self.battleOver(winner);
         }, 1000);
       } else {
-        this.turnCounter++;
+        // unit.setActive(false);
+
+        if(this.internalTurnCounter >= squad.getUnitCount()){
+          squad.setActive(false);
+          this.internalTurnCounter = 0;
+          this.turnCounter++;
+
+          var banner = new Sprite(800, 227);
+          if(squad.id == 1){
+            banner.image = core.assets[Image_UI[11]];
+          } else {
+            banner.image = core.assets[Image_UI[10]];
+          }
+
+          banner.opacity = 0;
+          banner.x = (core.width - banner.width) / 2;
+          banner.y = 200;
+          core.currentScene.addChild(banner);
+
+          var self = this;
+          banner.tl.fadeIn(30).delay(30).fadeOut(45).then(function(){
+            self.startTurn();
+            core.currentScene.removeChild(banner);
+          });
+        } else {
+          var self = this;
+          if(self.getActiveSquad instanceof EnemySquad){
+            setTimeout(function(){
+              self.startTurn();
+            }, 3000);
+          } else {
+            setTimeout(function(){
+              self.startTurn();
+            }, 1000);
+          }
+        }
       }
+    },
 
-      var banner = new Sprite(800, 227);
-      if(squad.id == 1){
-        banner.image = core.assets[Image_UI[10]];
-      } else {
-        banner.image = core.assets[Image_UI[11]];
-      }
+    skipTurn: function(){
+      var unit = this.getActiveUnit();
+      unit.setActive(false);
+      this.internalTurnCounter++;
+      setTimeout(function(){
+        this.startTurn();
+      }, 2000);
 
-      banner.opacity = 0;
-      banner.x = (core.width - banner.width) / 2;
-      banner.y = 300;
-      core.currentScene.addChild(banner);
-
-      var self = this;
-      banner.tl.fadeIn(20).delay(30).fadeOut(10).then(function(){
-        self.startTurn();
-        core.currentScene.removeChild(banner);
-      });
     },
 
     getWinner : function(){
-      if(this.enemySquad.getUnitCount() == 0){
-        return this.squad;
-      } else if (this.squad.getUnitCount() == 0){
-        return this.enemySquad;
+      if(this.getNonActiveSquad().getUnitCount() == 0){
+        return this.getActiveSquad();
+      } else if (this.getActiveSquad().getUnitCount() == 0){
+        return this.getNonActiveSquad();
       }
       return null;
     },
-
+    // modification starts
     battleOver: function(winner){
-      var touchable = new ShieldWindow(this);
       Utils.beginUIShield();
 
-      var banner = new Sprite(800, 227);
-      banner.image = core.assets[Image_UI[9]];
+      var result = new makeMessage("Survived....", core.width/2 - 400, 200);
+      core.currentScene.addChild(result);
 
-      banner.opacity = 0;
-      banner.x = (core.width - banner.width) / 2;
-      banner.y = 300;
-      core.currentScene.addChild(banner);
+      result.tl.fadeIn(20).delay(45).fadeOut(20).then(function(){
+        core.currentScene.removeChild(result);
+        playerStatus.squad = this.squad;
+        Utils.endUIShield();
+        core.isBattle = false;
+        core.popScene();
+      })
 
-      var self = this;
-      banner.tl.fadeIn(20).delay(30).fadeOut(10).then(function(){
-        core.currentScene.removeChild(banner);
+      // var self = this;
+      // result.tl.fadeIn(20).delay(30).fadeOut(10).then(function(){
+      //   core.currentScene.removeChild(result);
+      //
+      //   var resultBanner = new Sprite(512, 256);
+      //   if(winner.id == 1){
+      //     resultBanner.image = core.assets[Image_UI[12]];
+      //     touchable.onTouch = function(){
+      //       // Save current data
+      //       core.popScene();
+      //       core.isBattle = false;
+      //     };
+      //   } else if (winner.id == 2){
+      //     resultBanner.image = core.assets[Image_UI[13]];
+      //     touchable.onTouch = function(){
+      //       core.isBattle = false;
+      //       location.reload();
+      //     };
+      //   }
+      //
+      //   resultBanner.opacity = 0;
+      //   resultBanner.touchEnabled = false;
+      //   resultBanner.x = (core.width - resultBanner.width) / 2;
+      //   resultBanner.y = 200;
+      //   core.currentScene.addChild(resultBanner);
+      //
+      //   resultBanner.tl.fadeIn(20).then(function(){
+      //     Utils.endUIShield();
+      //   });
+      // });
+    }, // End of battleOver method
 
-        var resultBanner = new Sprite(512, 256);
-        if(winner.id == 1){
-          resultBanner.image = core.assets[Image_UI[12]];
-          touchable.onTouch = function(){
-            // Save current data
-            core.popScene();
-            core.isBattle = false;
-          };
-        } else if (winner.id == 2){
-          resultBanner.image = core.assets[Image_UI[13]];
-          touchable.onTouch = function(){
-            core.isBattle = false;
-            location.reload();
-          };
-        }
-
-        resultBanner.opacity = 0;
-        resultBanner.touchEnabled = false;
-        resultBanner.x = (core.width - resultBanner.width) / 2;
-        resultBanner.y = 200;
-        core.currentScene.addChild(resultBanner);
-
-        resultBanner.tl.fadeIn(20).then(function(){
-          Utils.endUIShield();
-        });
-      });
-    }
   });
 
-  // StatusWindow can replace the role of FrameUI Class
+  var makeMessage = function(text, x, y) {
+      var label = new Label(text);
+      label.font  = "64px bold monospace, Arial, sans-serif";
+      label.color = "rgb(172, 5, 0)";
+      label.x = x;
+      label.y = y;
+      label.textAlign = "center"
+      label.width = 800;
+      label.height = 300;
+      return label;
+  }
+
+  // StatusWindow replaces the role of FrameUI Class
   var StatusWindow = Class.create(Group, {
-    initialize: function(){
+    initialize: function(clickedUnit){
       Group.call(this);
 
       var bgWindow = new Sprite(2000, 220);
@@ -1784,18 +2494,26 @@ window.onload = function(){
       this.bgWindow = bgWindow;
       this.addChild(bgWindow);
 
-      var fontColor = "rgba(255, 255, 105, 1.0)";
+      var fontColor = "rgb(89, 235, 0)";
+      var fontStyle = "15px 'century', arial, sans-serif";
 
       this.turnLabel = new Label();
       this.addChild(this.turnLabel);
-      this.turnLabel.x = core.width / 2 - this.turnLabel.width / 2;
+      this.turnLabel.x = core.width / 2 - this.turnLabel.width / 2 + 500;
       this.turnLabel.y = 850;
       this.turnLabel.font = fontStyle;
       this.turnLabel.color = fontColor;
 
+      this.internalTurnLabel = new Label();
+      this.addChild(this.internalTurnLabel);
+      this.internalTurnLabel.x = core.width / 2 - this.internalTurnLabel.width / 2 + 500;
+      this.internalTurnLabel.y = 910;
+      this.internalTurnLabel.font = fontStyle;
+      this.internalTurnLabel.color = fontColor;
+
       this.unitLabel = new Label();
       this.addChild(this.unitLabel);
-      this.unitLabel.x = core.width / 2 - this.unitLabel.width / 2;
+      this.unitLabel.x = core.width / 2 - this.unitLabel.width / 2 + 500;
       this.unitLabel.y = 900;
       this.unitLabel.font = fontStyle;
       this.unitLabel.color = fontColor;
@@ -1815,7 +2533,7 @@ window.onload = function(){
 
       var self = this;
       this.torch.addEventListener(enchant.Event.TOUCH_START, function(params) {
-          self.torch.tl.scaleTo(3, 10, enchant.Easing.ELASTIC_EASEOUT);
+        self.torch.tl.scaleTo(3, 10, enchant.Easing.ELASTIC_EASEOUT);
       });
 
       this.torch.addEventListener(enchant.Event.TOUCH_END, function(params) {
@@ -1838,12 +2556,181 @@ window.onload = function(){
       this.turnLabel.text = "Round: " + turn;
     },
 
+    updateInternalTurn: function(internalTurn){
+      this.internalTurnLabel.text = "Round: " + internalTurn;
+    },
+
     updateUnit: function(name){
       this.unitLabel.text = name;
     },
 
-    updateWindowInfo: function(activeUnit){
-      this.thumbnail.image = activeUnit.thumbImage;
+    updateWindowInfo: function(clickedUnit){
+      this.thumbnail.image = clickedUnit.thumbImage;
+      if(this.panel){
+        this.removeChild(this.panel);
+        delete this.panel;
+      }
+      this.panel = new Panel(clickedUnit, this);
+      this.addChild(this.panel);
+    }
+  });
+
+  var Panel = Class.create(Group, {
+    initialize: function(clickedUnit, statusWindow){
+      Group.call(this);
+
+      this.clickedUnit = clickedUnit;
+      clickedUnit.commandPanel = this;
+      this.statusWindow = statusWindow;
+
+      var fontColor = "rgb(89, 235, 0)";
+      var fontStyle = "15px 'century', arial, sans-serif";
+
+      this.bgPanel = new Sprite();
+      this.addChild(this.bgPanel);
+
+      var statsGroup = new Group();
+      statsGroup.x = 300;
+      statsGroup.y = 810;
+      this.addChild(statsGroup);
+
+      unitLabel = new Label("Name："+this.clickedUnit.getName());
+      statsGroup.addChild(unitLabel);
+      unitLabel.x = 0;
+      unitLabel.y = 0;
+      unitLabel.font = fontStyle;
+      unitLabel.color = fontColor;
+
+      jobLabel = new Label("Job："+this.clickedUnit.getJob());
+      statsGroup.addChild(jobLabel);
+      jobLabel.x = 0;
+      jobLabel.y = 24 * 1;
+      jobLabel.font = fontStyle;
+      jobLabel.color = fontColor;
+
+      attackLabel = new Label("DAMAGE："+this.clickedUnit.getDamage());
+      statsGroup.addChild(attackLabel);
+      attackLabel.x = 0;
+      attackLabel.y = 24 * 2;
+      attackLabel.font = fontStyle;
+      attackLabel.color = fontColor;
+
+      defenseLabel = new Label("PROTECTION："+this.clickedUnit.getProtection());
+      statsGroup.addChild(defenseLabel);
+      defenseLabel.x = 0;
+      defenseLabel.y = 24 * 3;
+      defenseLabel.font = fontStyle;
+      defenseLabel.color = fontColor;
+
+      accuracyLabel = new Label("ACCURACY："+this.clickedUnit.getAccuracy());
+      statsGroup.addChild(accuracyLabel);
+      accuracyLabel.x = 0;
+      accuracyLabel.y = 24 * 4;
+      accuracyLabel.font = fontStyle;
+      accuracyLabel.color = fontColor;
+
+      dodgeLabel = new Label("DODGE："+this.clickedUnit.getDodge());
+      statsGroup.addChild(dodgeLabel);
+      dodgeLabel.x = 0;
+      dodgeLabel.y = 24 * 5;
+      dodgeLabel.font = fontStyle;
+      dodgeLabel.color = fontColor;
+
+      hpLabel = new Label("HP："+this.clickedUnit.getHP()+"/"+this.clickedUnit.getHPMax());
+      statsGroup.addChild(hpLabel);
+      hpLabel.x = 0;
+      hpLabel.y = 24 * 6;
+      hpLabel.font = fontStyle;
+      hpLabel.color = fontColor;
+
+      mpLabel = new Label("MP："+this.clickedUnit.getMP()+"/"+this.clickedUnit.getMPMax());
+      statsGroup.addChild(mpLabel);
+      mpLabel.x = 0;
+      mpLabel.y = 24 * 7;
+      mpLabel.font = fontStyle;
+      mpLabel.color = fontColor;
+
+      // Skill Commands
+      var skillColumn = new Group();
+      skillColumn.x = 500;
+      skillColumn.y = statsGroup.y + 10;
+      this.addChild(skillColumn);
+
+      var firstSkillSprite = new SkillIcon(clickedUnit, 1);
+      firstSkillSprite.image = clickedUnit.getSkillImage(clickedUnit);
+      firstSkillSprite.x = 0;
+      firstSkillSprite.y = 0;
+      skillColumn.addChild(firstSkillSprite);
+      this.firstSkillSprite = firstSkillSprite;
+
+      var secondSkillSprite = new SkillIcon(clickedUnit, 2);
+      secondSkillSprite.image = clickedUnit.getSkillImage(clickedUnit);
+      secondSkillSprite.x = firstSkillSprite.x + 130;
+      secondSkillSprite.y = 0;
+      skillColumn.addChild(secondSkillSprite);
+      this.secondSkillSprite = secondSkillSprite;
+
+      var thirdSkillSprite = new SkillIcon(clickedUnit, 3);
+      thirdSkillSprite.image = clickedUnit.getSkillImage(clickedUnit);
+      thirdSkillSprite.x = secondSkillSprite.x + 130;
+      thirdSkillSprite.y = 0;
+      skillColumn.addChild(thirdSkillSprite);
+      this.thirdSkillSprite = thirdSkillSprite;
+
+      var fourthSkillSprite = new SkillIcon(clickedUnit, 4);
+      fourthSkillSprite.image = clickedUnit.getSkillImage(clickedUnit);
+      fourthSkillSprite.x = thirdSkillSprite.x + 130;
+      fourthSkillSprite.y = 0;
+      skillColumn.addChild(fourthSkillSprite);
+      this.fourthSkillSprite = fourthSkillSprite;
+
+      var fifthSkillSprite = new SkillIcon(clickedUnit, 5);
+      fifthSkillSprite.image = clickedUnit.getSkillImage(clickedUnit);
+      fifthSkillSprite.x = fourthSkillSprite.x + 130;
+      fifthSkillSprite.y = 0;
+      skillColumn.addChild(fifthSkillSprite);
+      this.fifthSkillSprite = fifthSkillSprite;
+
+      var sixthSkillSprite = new SkillIcon(clickedUnit, 6);
+      sixthSkillSprite.image = clickedUnit.getSkillImage(clickedUnit);
+      sixthSkillSprite.x = fifthSkillSprite.x + 130;
+      sixthSkillSprite.y = 0;
+      skillColumn.addChild(sixthSkillSprite);
+      this.sixthSkillSprite = sixthSkillSprite;
+
+    }
+  });
+
+  var SkillIcon = Class.create(Sprite, {
+    initialize: function(unit, skillID){
+      Sprite.call(this, 120, 120);
+
+      this.id = skillID;
+      this.frame = skillID - 1;
+
+      var manager = unit.squad.manager;
+
+      this.addEventListener("touchstart", function(e){
+        this.tl.scaleTo(1.2, 10, enchant.Easing.ELASTIC_EASEOUT);
+      });
+
+      var self = this;
+      this.addEventListener("touchend", function(e){
+        this.tl.scaleTo(1, 10, enchant.Easing.ELASTIC_EASEOUT);
+
+        if(!core.isBattle){
+          manager.sndManager.playFX(Audio[2]);
+          return;
+        }
+
+        if(manager.getActiveUnit() == unit){
+          manager.setCommand(unit, skillID);
+          manager.commandTurn();
+        } else {
+          manager.sndManager.playFX(Audio[2]);
+          console.log("Not my Turn");
+        }
+      });
     }
   });
 
@@ -1891,7 +2778,9 @@ window.onload = function(){
         });
 
         cancelBtnSprite.addEventListener("touchend", function(params){
-          cancelBtnSprite.tl.scaleTo(0.9, 3).and().fadeTo(0, 5);
+          cancelBtnSprite.tl.scaleTo(0.9, 3, enchant.Easing.ELASTIC_EASEOUT).then(function(){
+            windowGroup.removeChild(cancelBtnSprite);
+          });
           windowSprite.tl.fadeTo(0, 5).then(function(){
             manager.sndManager.playFX(Audio[2]);
             core.currentScene.removeChild(this);
@@ -2037,42 +2926,101 @@ window.onload = function(){
     var ZombieAAnimationData = {
       idleImage: core.assets[Image_ZombieA[1]],
       idleFrame: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40],
+      attackImage: core.assets[Image_ZombieA[2]],
+      attackFrame: [0,1,2,3,4,5,6,7,8,9,10,11,12,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,null],
+      hitImage: core.assets[Image_ZombieA[6]],
+      hitFrame: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,null]
     };
 
     var ZombieBAnimationData = {
       idleImage: core.assets[Image_ZombieB[1]],
       idleFrame: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40],
+      attackImage: core.assets[Image_ZombieB[2]],
+      attackFrame: [0,1,2,3,4,5,6,7,8,9,10,11,12,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,null],
+      hitImage: core.assets[Image_ZombieB[6]],
+      hitFrame: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,null]
     };
 
     var ZombieCAnimationData = {
       idleImage: core.assets[Image_ZombieC[1]],
       idleFrame: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40],
+      attackImage: core.assets[Image_ZombieC[2]],
+      attackFrame: [0,1,2,3,4,5,6,7,8,9,10,11,12,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,null],
+      hitImage: core.assets[Image_ZombieC[6]],
+      hitFrame: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,null]
     };
 
     var VolkerAnimationData = {
       idleImage: core.assets[Image_Volker[1]],
       idleFrame: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40],
+      attackImage: core.assets[Image_Volker[2]],
+      attackFrame: [0,1,2,3,4,5,6,7,8,9,10,11,12,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,null],
+      hitImage: core.assets[Image_Volker[6]],
+      hitFrame: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,null]
     };
 
-    var undeadA = new ZombieA(5, ZombieAAnimationData);
-    var undeadB = new ZombieB(6, ZombieBAnimationData);
-    var undeadC = new ZombieC(7, ZombieCAnimationData);
-    var undeadC2 = new ZombieC(8, ZombieCAnimationData);
+    var ZombieSkillData = {
+      101: {
+        id: 101,
+        name: "Dead Mans Rush",
+        actionPoint: 1,
+        type: "multi",
+        availablePos: [1, 2, 3, 4],
+        targetPos: [1],
+        damageType: "attack",
+        duration: 1,
+        damage: 5,
+        mentalDamage: 0
+      },
+
+      102: {
+        id: 102,
+        name: "Spectral Smite",
+        actionPoint: 1,
+        type: "single",
+        availablePos: [1, 2, 3, 4],
+        targetPos: [2, 3],
+        damageType: "attack",
+        duration: 1,
+        damage: 3,
+        mentalDamage: 0
+      },
+
+      103: {
+        id: 103,
+        name: "Archilles Shot",
+        actionPoint: 1,
+        type: "single",
+        availablePos: [1, 2, 3],
+        targetPos: [4],
+        damageType: "attack",
+        duration: 1,
+        damage: 7,
+        mentalDamage: 0
+      },
+    };
+
+    var undeadA = new ZombieA(5, ZombieAAnimationData, ZombieSkillData);
+    var undeadB = new ZombieB(6, ZombieBAnimationData, ZombieSkillData);
+    var undeadC = new ZombieC(7, ZombieCAnimationData, ZombieSkillData);
+    var undeadC2 = new ZombieC(8, ZombieCAnimationData, ZombieSkillData);
 
     var horde = new EnemySquad(2, undeadA, undeadB, undeadC, undeadC2);
+    horde.name = "Zombies";
+    manager.addSquad(horde);
     scene.addChild(horde);
 
     var squad = playerStatus.squad;
     scene.addChild(squad);
 
-    manager.beginBattle(squad, horde);
+    manager.beginBattle();
 
     return scene;
   };
 
   // Main program
   core.onload = function(){
-
+    // JSON Object
     var bgData = {
       cloudSmallData: [
         [-1,-1, 0,-1,-1,-1,-1,-1,-1,-1,-1, 0,-1,-1,-1,-1,-1,-1],
@@ -2107,7 +3055,11 @@ window.onload = function(){
       idleFrame: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40],
       moveImage: core.assets[Image_Character_H1_G1[10]],
       moveFrame: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],
-      moveBackFrame: [20,19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1]
+      moveBackFrame: [20,19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1],
+      attackImage: core.assets[Image_Character_H1_G1[9]],
+      attackFrame: [0,1,2,3,4,5,6,7,8,9,10,11,0,1,2,3,4,5,6,7,8,9,10,11,null],
+      hitImage: core.assets[Image_Character_H1_G1[4]],
+      hitFrame: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,null]
     };
 
     var PoliceAnimationData = {
@@ -2115,7 +3067,11 @@ window.onload = function(){
       idleFrame: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40],
       moveImage: core.assets[Image_Character_H2_G3[10]],
       moveFrame: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],
-      moveBackFrame: [20,19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1]
+      moveBackFrame: [20,19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1],
+      attackImage: core.assets[Image_Character_H2_G3[9]],
+      attackFrame: [0,1,2,3,4,5,6,7,8,9,10,11,0,1,2,3,4,5,6,7,8,9,10,11,null],
+      hitImage: core.assets[Image_Character_H2_G3[4]],
+      hitFrame: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,null]
     };
 
     var CLeaderAnimationData = {
@@ -2123,7 +3079,11 @@ window.onload = function(){
       idleFrame: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40],
       moveImage: core.assets[Image_Character_H3_NoGun[9]],
       moveFrame: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],
-      moveBackFrame: [20,19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1]
+      moveBackFrame: [20,19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1],
+      attackImage: core.assets[Image_Character_H3_NoGun[8]],
+      attackFrame: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,null],
+      hitImage: core.assets[Image_Character_H3_NoGun[4]],
+      hitFrame: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,null]
     };
 
     var NurseAnimationData = {
@@ -2131,28 +3091,247 @@ window.onload = function(){
       idleFrame: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40],
       moveImage: core.assets[Image_Character_H3_G4[10]],
       moveFrame: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],
-      moveBackFrame: [20,19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1]
+      moveBackFrame: [20,19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1],
+      attackImage: core.assets[Image_Character_H3_G4[9]],
+      attackFrame: [0,1,2,3,4,5,6,7,8,9,10,11,12,0,1,2,3,4,5,6,7,8,9,10,11,12,null],
+      hitImage: core.assets[Image_Character_H3_G4[4]],
+      hitFrame: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,null]
     };
 
+    var SkillData = {
+      1: {
+        id: 1,
+        name: "Twirling Silver",
+        job: "Gang",
+        actionPoint: 1,
+        type: "multi",
+        availablePos: [1, 2],
+        targetPos: [1, 2],
+        damageType: "attack",
+        duration: 1,
+        damage: 4,
+        mentalDamage: 0
+      },
+
+      2: {
+        id: 2,
+        name: "Archilles Shot",
+        job: "Gang",
+        actionPoint: 1,
+        type: "single",
+        availablePos: [1, 2, 3],
+        targetPos: [3, 4],
+        damageType: "attack",
+        duration: 1,
+        damage: 7,
+        mentalDamage: 0
+      },
+
+      3: {
+        id: 3,
+        name: "Target Lock",
+        job: "Gang",
+        actionPoint: 1,
+        type: "single",
+        availablePos: [1, 2, 3],
+        targetPos: [1, 2, 3],
+        damageType: "debuff",
+        duration: 1,
+        damage: 0,
+        mentalDamage: 0
+      },
+
+      4: {
+        id: 4,
+        name: "Hellfire Brew",
+        job: "Gang",
+        actionPoint: 1,
+        type: "single",
+        availablePos: [1],
+        targetPos: [1],
+        damageType: "attack",
+        duration: 1,
+        damage: 12,
+        mentalDamage: 0
+      },
+
+      5: {
+        id: 5,
+        name: "Icon Cannon",
+        actionPoint: 1,
+        type: "single",
+        availablePos: [3, 4],
+        targetPos: [4],
+        damageType: "attack",
+        duration: 1,
+        damage: 14,
+        mentalDamage: 0
+      },
+
+      6: {
+        id: 6,
+        name: "Shroudstep",
+        actionPoint: 1,
+        type: "single",
+        availablePos: [2, 3, 4],
+        targetPos: [2, 3],
+        damageType: "attack",
+        duration: 1,
+        damage: 7,
+        mentalDamage: 0
+      },
+
+      7: {
+        id: 7,
+        name: "Mad Cannon",
+        actionPoint: 1,
+        type: "single",
+        availablePos: [4],
+        targetPos: [1, 2, 3, 4],
+        damageType: "attack",
+        duration: 1,
+        damage: 3,
+        mentalDamage: 0
+      },
+
+      8: {
+        id: 8,
+        name: "Shimmer Strike",
+        actionPoint: 1,
+        type: "single",
+        availablePos: [3, 4],
+        targetPos: [1],
+        damageType: "attack",
+        duration: 1,
+        damage: 16,
+        mentalDamage: 0
+      },
+
+      9: {
+        id: 9,
+        name: "Merciless Pursuit",
+        actionPoint: 1,
+        type: "single",
+        availablePos: [1, 2],
+        targetPos: [3, 4],
+        damageType: "attack",
+        duration: 1,
+        damage: 8,
+        mentalDamage: 0
+      },
+
+      10: {
+        id: 10,
+        name: "Blast Tremor",
+        actionPoint: 1,
+        type: "single",
+        availablePos: [2, 3],
+        targetPos: [3, 4],
+        damageType: "attack",
+        duration: 1,
+        damage: 9,
+        mentalDamage: 0
+      },
+
+      11: {
+        id: 11,
+        name: "StormGuard",
+        actionPoint: 1,
+        type: "single",
+        availablePos: [1, 2, 3],
+        targetPos: [1, 2],
+        damageType: "attack",
+        duration: 1,
+        damage: 5,
+        mentalDamage: 0
+      },
+
+      12: {
+        id: 12,
+        name: "Julias Song",
+        actionPoint: 1,
+        type: "single",
+        availablePos: [1, 2, 3, 4],
+        targetPos: [2, 3, 4],
+        damageType: "attack",
+        duration: 1,
+        damage: 6,
+        mentalDamage: 0
+      },
+
+      13: {
+        id: 13,
+        name: "Merciless Pursuit",
+        actionPoint: 1,
+        type: "single",
+        availablePos: [1, 2],
+        targetPos: [3, 4],
+        damageType: "attack",
+        duration: 1,
+        damage: 8,
+        mentalDamage: 0
+      },
+
+      14: {
+        id: 14,
+        name: "Suppressing Fire",
+        actionPoint: 1,
+        type: "single",
+        availablePos: [3, 4],
+        targetPos: [2, 3, 4],
+        damageType: "attack",
+        duration: 1,
+        damage: 4,
+        mentalDamage: 0
+      },
+
+      15: {
+        id: 15,
+        name: "Buckshot Bonanaza",
+        actionPoint: 1,
+        type: "single",
+        availablePos: [1, 2, 3],
+        targetPos: [1, 2],
+        damageType: "attack",
+        duration: 1,
+        damage: 6,
+        mentalDamage: 0
+      },
+
+      16: {
+        id: 16,
+        name: "Solar Storm",
+        actionPoint: 1,
+        type: "single",
+        availablePos: [3, 4],
+        targetPos: [1, 2],
+        damageType: "attack",
+        duration: 1,
+        damage: 12,
+        mentalDamage: 0
+      },
+    };
+
+    // Creating Objects
+    var gang = new Gang(1, GangAnimationData, SkillData);
+    var police = new Police(2, PoliceAnimationData, SkillData);
+    var cheerLeader = new CheerLeader(3, CLeaderAnimationData, SkillData);
+    var nurse = new Nurse(4, NurseAnimationData, SkillData);
+
     var stage = new Stage(core.rootScene, bgData);
-
-    var statusWindow = new StatusWindow();
-
-    var gang = new Gang(1, GangAnimationData);
-    var police = new Police(2, PoliceAnimationData);
-    var cheerLeader = new CheerLeader(3, CLeaderAnimationData);
-    var nurse = new Nurse(4, NurseAnimationData);
-
     var squad = new Squad(1, gang, cheerLeader, nurse, police);
+    squad.name = "Rangers";
 
+    var statusWindow = new StatusWindow(squad.position[1]);
     stage.addChild(squad);
     stage.setSquad(squad);
+    squad.setStatusWindow(statusWindow);
 
     var manager = new Manager(statusWindow, core.rootScene);
     manager.sndManager.playFieldBGM();
     manager.addSquad(squad);
 
-    var trigger1 = new EventTrigger(1500, squad.position[1].collisionRange);
+    var trigger1 = new EventTrigger(1000, squad.position[1].collisionRange);
     stage.addObject(trigger1);
 
     core.rootScene.addEventListener("enterframe", function(){
